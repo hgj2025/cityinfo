@@ -1,0 +1,64 @@
+import api from './api';
+
+// 用户认证相关的类型定义
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData extends LoginData {
+  name: string;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+}
+
+export interface AuthResponse {
+  status: string;
+  data: {
+    user: UserProfile;
+    token: string;
+  };
+}
+
+// 认证服务
+export const authService = {
+  // 用户登录
+  async login(data: LoginData): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/login', data);
+    if (response.data?.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response;
+  },
+
+  // 用户注册
+  async register(data: RegisterData): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/register', data);
+    if (response.data?.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response;
+  },
+
+  // 获取用户信息
+  async getProfile(): Promise<UserProfile> {
+    const response = await api.get('/auth/profile');
+    return response.data.user;
+  },
+
+  // 退出登录
+  logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  },
+
+  // 检查是否已登录
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('token');
+  },
+};

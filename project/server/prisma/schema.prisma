@@ -1,0 +1,103 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  collections Collection[]
+}
+
+model City {
+  id          String   @id @default(uuid())
+  name        String
+  nameEn      String
+  description String
+  image       String
+  location    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attractions Attraction[]
+  restaurants Restaurant[]
+  hotels      Hotel[]
+}
+
+model Attraction {
+  id          String   @id @default(uuid())
+  name        String
+  nameEn      String
+  description String
+  image       String
+  location    String
+  price       Float?
+  openTime    String?
+  cityId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  city        City        @relation(fields: [cityId], references: [id])
+  collections Collection[]
+}
+
+model Restaurant {
+  id          String   @id @default(uuid())
+  name        String
+  nameEn      String
+  description String
+  image       String
+  location    String
+  priceRange  String
+  cuisine     String
+  cityId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  city        City        @relation(fields: [cityId], references: [id])
+  collections Collection[]
+}
+
+model Hotel {
+  id          String   @id @default(uuid())
+  name        String
+  nameEn      String
+  description String
+  image       String
+  location    String
+  priceRange  String
+  stars       Int
+  cityId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  city        City        @relation(fields: [cityId], references: [id])
+  collections Collection[]
+}
+
+model Collection {
+  id           String   @id @default(uuid())
+  userId       String
+  itemType     String   // 'attraction', 'restaurant', 'hotel'
+  itemId       String
+  createdAt    DateTime @default(now())
+
+  user         User       @relation(fields: [userId], references: [id])
+  attraction   Attraction? @relation(fields: [itemId], references: [id])
+  restaurant   Restaurant? @relation(fields: [itemId], references: [id])
+  hotel        Hotel?      @relation(fields: [itemId], references: [id])
+
+  @@unique([userId, itemType, itemId])
+}
