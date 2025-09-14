@@ -6,6 +6,7 @@ import { restaurantRouter } from './restaurant.routes';
 import { hotelRouter } from './hotel.routes';
 import { collectionRouter } from './collection.routes';
 import { searchRouter } from './search.routes';
+import surveyRouter from './survey.routes';
 
 export const setupRoutes = (app: Router) => {
   // API版本前缀
@@ -32,6 +33,9 @@ export const setupRoutes = (app: Router) => {
 
   // 搜索路由
   apiRouter.use('/search', searchRouter);
+
+  // 调查表单路由
+  apiRouter.use('/survey', surveyRouter);
 
   // 健康检查路由
   apiRouter.get('/health', (req, res) => {

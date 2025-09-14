@@ -14,7 +14,8 @@ export const validateRequest = (
       message: err.msg
     }));
     
-    throw new AppError(400, 'Validation failed', true);
+    console.log('Validation errors:', errorMessages);
+    throw new AppError(400, 'Validation failed');
   }
   next();
 };

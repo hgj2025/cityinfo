@@ -24,6 +24,7 @@ model User {
 
   collections Collection[]
   travelSurveys TravelSurvey[]
+  surveyResponses SurveyResponse[]
   consultationRequests ConsultationRequest[]
   callbackRequests CallbackRequest[]
   emailSubscriptions EmailSubscription[]
@@ -233,6 +234,64 @@ model EmailSubscription {
   isActive          Boolean  @default(true)
   subscribedAt      DateTime @default(now())
   unsubscribedAt    DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User?    @relation(fields: [userId], references: [id])
+}
+
+// 智能旅游意向调查表单
+model SurveyResponse {
+  id                String   @id @default(uuid())
+  userId            String?
+  
+  // 基本信息
+  travelStyle       String?  // 旅行风格
+  budgetRange       String?  // 预算范围
+  travelDuration    String?  // 旅行时长
+  groupSize         Int?     // 同行人数
+  travelCompanions  String[] // 同行人类型
+  
+  // 目的地偏好
+  preferredDestinations String[] // 偏好目的地类型
+  climatePreference String?     // 气候偏好
+  seasonPreference  String[]   // 季节偏好
+  domesticVsInternational String? // 国内外偏好
+  
+  // 活动偏好
+  activityTypes     String[] // 活动类型偏好
+  accommodationType String?  // 住宿类型偏好
+  transportationMode String[] // 交通方式偏好
+  diningPreferences String[] // 餐饮偏好
+  
+  // 特殊需求
+  accessibilityNeeds String[] // 无障碍需求
+  dietaryRestrictions String[] // 饮食限制
+  languageBarriers  Boolean? // 语言障碍担忧
+  safetyPriority    Int?     // 安全优先级（1-5）
+  
+  // 兴趣标签
+  interests         String[] // 兴趣爱好标签
+  
+  // 过往经验
+  travelExperience  String?  // 旅行经验水平
+  previousDestinations String[] // 曾去过的地方
+  
+  // 信息获取偏好
+  informationSources String[] // 信息来源偏好
+  bookingPreferences String[] // 预订偏好
+  
+  // 表单元数据
+  currentStep       Int      @default(1)
+  totalSteps        Int      @default(5)
+  isCompleted       Boolean  @default(false)
+  completedAt       DateTime?
+  lastSavedAt       DateTime @default(now())
+  
+  // 进度跟踪
+  completedFields   String[] // 已完成的字段名称
+  validationErrors  Json?    // 验证错误信息
   
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
