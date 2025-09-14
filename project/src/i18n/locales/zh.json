@@ -1,0 +1,103 @@
+{
+  "common": {
+    "home": "首页",
+    "cities": "城市",
+    "attractions": "景点",
+    "restaurants": "餐厅",
+    "hotels": "酒店",
+    "search": "搜索",
+    "loading": "加载中...",
+    "error": "出错了",
+    "retry": "重试",
+    "more": "更多",
+    "back": "返回",
+    "contact": "联系我们",
+    "about": "关于我们",
+    "language": "语言"
+  },
+  "navigation": {
+    "home": "首页",
+    "explore": "探索",
+    "favorites": "收藏",
+    "profile": "个人中心"
+  },
+  "home": {
+    "title": "发现美丽城市",
+    "subtitle": "探索世界各地的精彩景点、美食和住宿",
+    "searchPlaceholder": "搜索城市、景点或餐厅...",
+    "popularCities": "热门城市",
+    "featuredAttractions": "精选景点",
+    "recommendedRestaurants": "推荐餐厅"
+  },
+  "city": {
+    "attractions": "景点",
+    "restaurants": "餐厅",
+    "hotels": "酒店",
+    "overview": "概览",
+    "location": "位置",
+    "description": "描述"
+  },
+  "attraction": {
+    "openTime": "开放时间",
+    "price": "门票价格",
+    "location": "位置",
+    "description": "景点介绍",
+    "reviews": "游客评价",
+    "nearby": "附近景点"
+  },
+  "restaurant": {
+    "cuisine": "菜系",
+    "priceRange": "价格区间",
+    "openTime": "营业时间",
+    "contactNumber": "联系电话",
+    "location": "位置",
+    "description": "餐厅介绍",
+    "menu": "菜单",
+    "reviews": "用户评价"
+  },
+  "hotel": {
+    "rating": "评分",
+    "priceRange": "价格区间",
+    "amenities": "设施服务",
+    "contactNumber": "联系电话",
+    "location": "位置",
+    "description": "酒店介绍",
+    "rooms": "客房类型",
+    "reviews": "住客评价"
+  },
+  "footer": {
+    "aboutUs": "关于我们",
+    "aboutDescription": "CityInfo 致力于为旅行者提供最全面、最准确的城市信息，帮助您发现每个城市的独特魅力。",
+    "quickLinks": "快速链接",
+    "cities": "城市",
+    "attractions": "景点",
+    "restaurants": "餐厅",
+    "hotels": "酒店",
+    "contactUs": "联系我们",
+    "email": "邮箱",
+    "phone": "电话",
+    "address": "地址",
+    "followUs": "关注我们",
+    "copyright": "© 2024 CityInfo. 保留所有权利。"
+  },
+  "search": {
+    "placeholder": "搜索城市、景点、餐厅或酒店...",
+    "results": "搜索结果",
+    "noResults": "未找到相关结果",
+    "filters": "筛选",
+    "sortBy": "排序",
+    "category": "分类"
+  },
+  "favorites": {
+    "title": "我的收藏",
+    "empty": "您还没有收藏任何内容",
+    "add": "添加收藏",
+    "remove": "取消收藏"
+  },
+  "profile": {
+    "title": "个人中心",
+    "settings": "设置",
+    "language": "语言设置",
+    "logout": "退出登录"
+  }
+}

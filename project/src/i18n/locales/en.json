@@ -1,0 +1,103 @@
+{
+  "common": {
+    "home": "Home",
+    "cities": "Cities",
+    "attractions": "Attractions",
+    "restaurants": "Restaurants",
+    "hotels": "Hotels",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "more": "More",
+    "back": "Back",
+    "contact": "Contact Us",
+    "about": "About Us",
+    "language": "Language"
+  },
+  "navigation": {
+    "home": "Home",
+    "explore": "Explore",
+    "favorites": "Favorites",
+    "profile": "Profile"
+  },
+  "home": {
+    "title": "Discover Beautiful Cities",
+    "subtitle": "Explore amazing attractions, cuisine, and accommodations around the world",
+    "searchPlaceholder": "Search cities, attractions, or restaurants...",
+    "popularCities": "Popular Cities",
+    "featuredAttractions": "Featured Attractions",
+    "recommendedRestaurants": "Recommended Restaurants"
+  },
+  "city": {
+    "attractions": "Attractions",
+    "restaurants": "Restaurants",
+    "hotels": "Hotels",
+    "overview": "Overview",
+    "location": "Location",
+    "description": "Description"
+  },
+  "attraction": {
+    "openTime": "Opening Hours",
+    "price": "Ticket Price",
+    "location": "Location",
+    "description": "Description",
+    "reviews": "Reviews",
+    "nearby": "Nearby Attractions"
+  },
+  "restaurant": {
+    "cuisine": "Cuisine",
+    "priceRange": "Price Range",
+    "openTime": "Opening Hours",
+    "contactNumber": "Contact Number",
+    "location": "Location",
+    "description": "Description",
+    "menu": "Menu",
+    "reviews": "Reviews"
+  },
+  "hotel": {
+    "rating": "Rating",
+    "priceRange": "Price Range",
+    "amenities": "Amenities",
+    "contactNumber": "Contact Number",
+    "location": "Location",
+    "description": "Description",
+    "rooms": "Room Types",
+    "reviews": "Reviews"
+  },
+  "footer": {
+    "aboutUs": "About Us",
+    "aboutDescription": "CityInfo is dedicated to providing travelers with the most comprehensive and accurate city information, helping you discover the unique charm of every city.",
+    "quickLinks": "Quick Links",
+    "cities": "Cities",
+    "attractions": "Attractions",
+    "restaurants": "Restaurants",
+    "hotels": "Hotels",
+    "contactUs": "Contact Us",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "followUs": "Follow Us",
+    "copyright": "© 2024 CityInfo. All rights reserved."
+  },
+  "search": {
+    "placeholder": "Search cities, attractions, restaurants, or hotels...",
+    "results": "Search Results",
+    "noResults": "No results found",
+    "filters": "Filters",
+    "sortBy": "Sort By",
+    "category": "Category"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "empty": "You haven't favorited anything yet",
+    "add": "Add to Favorites",
+    "remove": "Remove from Favorites"
+  },
+  "profile": {
+    "title": "Profile",
+    "settings": "Settings",
+    "language": "Language Settings",
+    "logout": "Logout"
+  }
+}
