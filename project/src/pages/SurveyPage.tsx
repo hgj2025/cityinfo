@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import SurveyForm from '../components/survey/SurveyForm';
 import { SurveyFormData } from '../types/survey';
+import { surveyService } from '../services/surveyService';
 import styles from './SurveyPage.module.css';
 
 const SurveyPage: React.FC = () => {
@@ -12,24 +13,42 @@ const SurveyPage: React.FC = () => {
   const [savedData, setSavedData] = useState<Partial<SurveyFormData> | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [surveyId, setSurveyId] = useState<string | null>(null);
 
   // 加载保存的调查数据
   useEffect(() => {
     const loadSavedData = async () => {
       try {
         if (user?.id) {
-          // 这里应该调用API获取用户保存的调查数据
-          // const response = await surveyService.getSavedSurvey(user.id);
-          // setSavedData(response.data);
+          // 尝试获取用户最新的调查响应
+          const response = await surveyService.getUserLatestSurvey();
           
-          // 临时从localStorage获取
+          if (response.success && response.data && !response.data.isCompleted) {
+            // 用户有未完成的调查
+            setSurveyId(response.data.id);
+            setSavedData(response.data);
+          } else {
+            // 用户没有未完成的调查，创建一个新的
+            const createResponse = await surveyService.createSurvey({
+              currentStep: 1,
+              totalSteps: 5,
+              isCompleted: false
+            });
+            
+            if (createResponse.success && createResponse.data) {
+              setSurveyId(createResponse.data.id);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('加载保存的调查数据失败:', error);
+        // 如果API调用失败，尝试从localStorage获取
+        if (user?.id) {
           const saved = localStorage.getItem(`survey_${user.id}`);
           if (saved) {
             setSavedData(JSON.parse(saved));
           }
         }
-      } catch (error) {
-        console.error('加载保存的调查数据失败:', error);
       } finally {
         setLoading(false);
       }
@@ -42,23 +61,30 @@ const SurveyPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // 这里应该调用API提交调查数据
-      // await surveyService.submitSurvey(data);
+      if (!surveyId) {
+        throw new Error('调查ID不存在');
+      }
       
-      // 临时保存到localStorage
-      localStorage.setItem(`survey_completed_${user?.id}`, JSON.stringify(data));
-      localStorage.removeItem(`survey_${user?.id}`); // 清除临时保存的数据
+      // 提交完整的调查数据
+      const submitResponse = await surveyService.submitSurvey(surveyId, data);
       
-      console.log('调查提交成功:', data);
-      
-      setShowSuccessMessage(true);
-      
-      // 3秒后跳转到结果页面或首页
-      setTimeout(() => {
-        navigate('/survey-result', { 
-          state: { surveyData: data } 
-        });
-      }, 3000);
+      if (submitResponse.success) {
+        console.log('调查提交成功:', submitResponse.data);
+        
+        // 清除localStorage中的临时数据
+        localStorage.removeItem(`survey_${user?.id}`);
+        
+        setShowSuccessMessage(true);
+        
+        // 3秒后跳转到结果页面或首页
+        setTimeout(() => {
+          navigate('/survey-result', { 
+            state: { surveyData: submitResponse.data } 
+          });
+        }, 3000);
+      } else {
+        throw new Error('提交调查失败');
+      }
       
     } catch (error) {
       console.error('提交调查失败:', error);
@@ -70,15 +96,23 @@ const SurveyPage: React.FC = () => {
 
   const handleSurveySave = async (data: Partial<SurveyFormData>) => {
     try {
-      // 这里应该调用API保存调查数据
-      // await surveyService.saveSurvey(data);
-      
-      // 临时保存到localStorage
-      localStorage.setItem(`survey_${user?.id}`, JSON.stringify(data));
-      
-      console.log('调查数据已自动保存');
+      if (surveyId) {
+        // 使用API自动保存调查进度
+        await surveyService.autoSaveSurvey(surveyId, {
+          currentStep: data.currentStep || 1,
+          data: data
+        });
+        console.log('调查数据已自动保存到服务器');
+      } else {
+        // 如果没有surveyId，临时保存到localStorage
+        localStorage.setItem(`survey_${user?.id}`, JSON.stringify(data));
+        console.log('调查数据已临时保存');
+      }
     } catch (error) {
       console.error('保存调查数据失败:', error);
+      // 如果API保存失败，回退到localStorage
+      localStorage.setItem(`survey_${user?.id}`, JSON.stringify(data));
+      console.log('API保存失败，已保存到本地');
     }
   };
 

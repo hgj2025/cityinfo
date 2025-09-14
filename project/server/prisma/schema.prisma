@@ -23,7 +23,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   collections Collection[]
-  travelSurveys TravelSurvey[]
+  travelPlans TravelPlan[]
   surveyResponses SurveyResponse[]
   consultationRequests ConsultationRequest[]
   callbackRequests CallbackRequest[]
@@ -116,7 +116,7 @@ model Collection {
 }
 
 // 旅游需求收集相关模型
-model TravelSurvey {
+model TravelPlan {
   id                String   @id @default(uuid())
   userId            String
   

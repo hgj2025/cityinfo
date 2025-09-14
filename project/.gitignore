@@ -131,3 +131,7 @@ Thumbs.db
 # Temporary folders
 tmp/
 temp/
+
+# Prisma generated files
+.prisma/
+node_modules/.prisma/
