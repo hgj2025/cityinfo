@@ -38,6 +38,15 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
+    path: '/city-detail/:id',
+    element: (
+      <ErrorBoundary>
+        <P_city_detail />
+      </ErrorBoundary>
+    ),
+    errorElement: <ErrorPage />,
+  },
+  {
     path: '/attraction-detail',
     element: (
       <ErrorBoundary>

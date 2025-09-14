@@ -107,7 +107,7 @@ export class SearchController {
             description: true,
             image: true,
             priceRange: true,
-            rating: true,
+            stars: true,
             type: () => 'hotel' as const
           }
         });

@@ -25,23 +25,15 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  // 3. 在错误被捕获后，这个生命周期方法被调用，适合执行“副作用”，比如记日志
+  // 3. 在错误被捕获后，这个生命周期方法被调用，适合执行"副作用"，比如记日志
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     if (!import.meta.env.DEV) {
       return;
     }
-    console.log('ErrorBoundary 成功捕获错误，准备发送日志...');
-    
-    // 将错误发送到 Vite 终端（我们的后端接收站）
-    fetch('/log-error-from-frontend', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
-      }),
-    }).catch(e => console.error('发送错误日志到 Vite 终端失败', e));
+    console.log('ErrorBoundary 成功捕获错误:');
+    console.error('Error:', error.message);
+    console.error('Stack:', error.stack);
+    console.error('Component Stack:', errorInfo.componentStack);
   }
 
   public render() {

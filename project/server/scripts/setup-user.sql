@@ -7,9 +7,6 @@ CREATE USER cityinfo_app WITH PASSWORD 'cityinfo_2024';
 -- 创建只读用户（用于数据分析等场景）
 CREATE USER cityinfo_readonly WITH PASSWORD 'readonly_2024';
 
--- 连接到cityinfo数据库
-\c cityinfo;
-
 -- 为应用程序用户授予完整权限
 GRANT CONNECT ON DATABASE cityinfo TO cityinfo_app;
 GRANT USAGE ON SCHEMA public TO cityinfo_app;

@@ -126,7 +126,7 @@ export class CityController {
               image: true,
               location: true,
               priceRange: true,
-              rating: true
+              stars: true
             }
           }
         }
@@ -184,7 +184,7 @@ export class CityController {
           image: hotel.image,
           location: hotel.location,
           priceRange: hotel.priceRange,
-          rating: hotel.rating
+          stars: hotel.stars
         }))
       };
 

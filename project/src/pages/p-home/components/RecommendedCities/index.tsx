@@ -14,7 +14,7 @@ const RecommendedCities = () => {
       try {
         setLoading(true);
         const response = await cityService.getCities({ limit: 4 });
-        setCities(response.data.items);
+        setCities(response.data.cities);
         setError(null);
       } catch (err) {
         setError('获取推荐城市失败');

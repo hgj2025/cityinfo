@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useParams } from 'react-router-dom';
 import styles from './styles.module.css';
 
 // 组件导入
@@ -17,20 +17,41 @@ import ShareModal from './components/ShareModal';
 
 // 类型导入
 import { Attraction, Food, Accommodation, TransportConnection, CityData } from './types';
+import { cityService } from '../../services';
 
 const CityDetail = () => {
   const [searchParams] = useSearchParams();
-  const cityId = searchParams.get('city_id') || 'nanjing';
+  const { id: pathId } = useParams();
+  const cityId = pathId || searchParams.get('city_id') || 'nanjing';
   
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [cityData, setCityData] = useState<CityData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // 城市数据
-  const cityData: CityData = {
-    id: 'nanjing',
-    name: '南京',
-    slogan: '六朝古都，十朝都会，中华文明的重要发祥地之一',
-    imageUrl: 'https://images.unsplash.com/photo-1555921015-5532091f6026'
-  };
+  // 获取城市数据
+  useEffect(() => {
+    const fetchCityData = async () => {
+      try {
+        setLoading(true);
+        const response = await cityService.getCityById(cityId);
+        setCityData({
+          id: response.id,
+          name: response.name,
+          slogan: response.description,
+          imageUrl: response.image
+        });
+        setError(null);
+      } catch (err) {
+        setError('获取城市信息失败');
+        console.error('获取城市信息失败:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCityData();
+  }, [cityId]);
   
   // 景点数据
   const attractions: Attraction[] = [
@@ -239,9 +260,40 @@ const CityDetail = () => {
   // 设置页面标题
   useEffect(() => {
     const originalTitle = document.title;
-    document.title = '锦绣中华行 - 南京';
+    document.title = cityData ? `锦绣中华行 - ${cityData.name}` : '锦绣中华行';
     return () => { document.title = originalTitle; };
-  }, []);
+  }, [cityData]);
+
+  // 加载状态
+  if (loading) {
+    return (
+      <div className={styles.pageWrapper}>
+        <Header />
+        <div className="container mx-auto px-4 pt-24 md:pt-20 pb-12 flex justify-center items-center min-h-screen">
+          <div className="text-center">
+            <div className="text-lg">正在加载城市信息...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 错误状态
+  if (error || !cityData) {
+    return (
+      <div className={styles.pageWrapper}>
+        <Header />
+        <div className="container mx-auto px-4 pt-24 md:pt-20 pb-12 flex justify-center items-center min-h-screen">
+          <div className="text-center">
+            <div className="text-red-600 text-lg mb-4">{error || '城市信息不存在'}</div>
+            <Link to="/home" className="bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-lg">
+              返回首页
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.pageWrapper}>
