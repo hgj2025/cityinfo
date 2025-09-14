@@ -1,0 +1,192 @@
+/* 调查表单主容器 */
+.surveyContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 表单头部 */
+.surveyHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+/* 表单主体 */
+.surveyBody {
+  flex: 1;
+  margin-bottom: 2rem;
+}
+
+/* 表单底部 */
+.surveyFooter {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 自动保存指示器 */
+.autoSaveIndicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: slideInUp 0.3s ease-out forwards;
+  z-index: 1000;
+}
+
+.autoSaveText {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 错误状态 */
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #dc2626;
+  font-size: 1.1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+
+/* 动画 */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .surveyContainer {
+    margin: 1rem;
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .autoSaveIndicator {
+    bottom: 10px;
+    right: 10px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .surveyContainer {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .surveyHeader {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  
+  .surveyFooter {
+    padding-top: 1rem;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .surveyContainer {
+    background: #1f2937;
+    color: #f9fafb;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .title {
+    color: #f9fafb;
+  }
+  
+  .subtitle {
+    color: #d1d5db;
+  }
+  
+  .surveyHeader,
+  .surveyFooter {
+    border-color: #374151;
+  }
+  
+  .error {
+    background: #7f1d1d;
+    border-color: #dc2626;
+    color: #fecaca;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .surveyContainer {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .autoSaveIndicator {
+    display: none;
+  }
+}

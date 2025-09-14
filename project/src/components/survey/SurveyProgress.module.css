@@ -1,0 +1,323 @@
+/* 进度容器 */
+.progressContainer {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+/* 进度头部 */
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.stepInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.stepText {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.percentageText {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+/* 进度条容器 */
+.progressBarContainer {
+  margin-bottom: 1.5rem;
+}
+
+.progressBarBackground {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressBarGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* 步骤指示器 */
+.stepIndicators {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.stepCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  border: 2px solid #e5e7eb;
+  background: #ffffff;
+  color: #6b7280;
+}
+
+/* 步骤状态样式 */
+.stepIndicator.completed .stepCircle {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+  transform: scale(1.1);
+}
+
+.stepIndicator.current .stepCircle {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.stepIndicator.upcoming .stepCircle {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+}
+
+/* 步骤连接线 */
+.stepConnector {
+  position: absolute;
+  top: 50%;
+  left: 32px;
+  right: -32px;
+  height: 2px;
+  background: #e5e7eb;
+  transform: translateY(-50%);
+  z-index: 1;
+  transition: background-color 0.3s ease;
+}
+
+.stepConnector.connectorCompleted {
+  background: #10b981;
+}
+
+/* 图标样式 */
+.checkIcon {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.stepNumber {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* 进度详情 */
+.progressDetails {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.completedFieldsInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f0f9ff;
+  border: 1px solid #e0f2fe;
+  border-radius: 6px;
+}
+
+.completedFieldsText {
+  font-size: 0.875rem;
+  color: #0369a1;
+  font-weight: 500;
+}
+
+/* 动画 */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.stepIndicator.current .stepCircle {
+  animation: pulse 2s infinite;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .progressHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .stepInfo {
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+  }
+  
+  .stepCircle {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+  
+  .stepConnector {
+    left: 28px;
+    right: -28px;
+  }
+  
+  .completedFieldsInfo {
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .completedFieldsText {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stepIndicators {
+    margin-bottom: 0.75rem;
+  }
+  
+  .stepCircle {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+  
+  .stepConnector {
+    left: 24px;
+    right: -24px;
+    height: 1px;
+  }
+  
+  .stepText,
+  .percentageText {
+    font-size: 0.875rem;
+  }
+  
+  .progressBarBackground {
+    height: 6px;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .stepText {
+    color: #f3f4f6;
+  }
+  
+  .percentageText {
+    color: #60a5fa;
+  }
+  
+  .progressBarBackground {
+    background: #374151;
+  }
+  
+  .stepCircle {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+  }
+  
+  .stepIndicator.completed .stepCircle {
+    background: #059669;
+    border-color: #059669;
+  }
+  
+  .stepIndicator.current .stepCircle {
+    background: #2563eb;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+  }
+  
+  .stepIndicator.upcoming .stepCircle {
+    background: #1f2937;
+    border-color: #374151;
+    color: #6b7280;
+  }
+  
+  .stepConnector {
+    background: #4b5563;
+  }
+  
+  .stepConnector.connectorCompleted {
+    background: #059669;
+  }
+  
+  .completedFieldsInfo {
+    background: #1e3a8a;
+    border-color: #1e40af;
+  }
+  
+  .completedFieldsText {
+    color: #93c5fd;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .progressContainer {
+    margin-bottom: 1rem;
+  }
+  
+  .progressBarGlow {
+    display: none;
+  }
+  
+  .stepIndicator.current .stepCircle {
+    animation: none;
+  }
+}

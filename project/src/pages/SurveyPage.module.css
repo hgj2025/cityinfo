@@ -1,0 +1,469 @@
+/* 调查页面容器 */
+.surveyPageContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%);
+  padding: 2rem 1rem;
+}
+
+/* 页面头部 */
+.surveyPageHeader {
+  max-width: 800px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  color: #6b7280;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.backButton:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+  transform: translateX(-2px);
+}
+
+.headerContent {
+  flex: 1;
+  text-align: center;
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.pageDescription {
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 调查内容区域 */
+.surveyContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 恢复进度提示 */
+.resumeNotice {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #dbeafe;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #1e40af;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  z-index: 1000;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.resumeIcon {
+  font-size: 1.2rem;
+}
+
+.resumeText {
+  font-size: 0.875rem;
+}
+
+/* 加载状态 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loadingText {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 提交中遮罩层 */
+.submittingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.submittingCard {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  margin: 1rem;
+}
+
+.submittingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+.submittingText {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+/* 成功页面 */
+.successContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.successCard {
+  background: #ffffff;
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  animation: scaleIn 0.5s ease-out;
+}
+
+.successIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 1s ease-out;
+}
+
+.successTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #065f46;
+  margin: 0 0 1rem 0;
+}
+
+.successMessage {
+  font-size: 1.125rem;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.loadingIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #bbf7d0;
+  border-top: 2px solid #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  font-size: 0.95rem;
+  color: #065f46;
+  font-weight: 500;
+}
+
+/* 动画 */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .surveyPageContainer {
+    padding: 1rem 0.5rem;
+  }
+  
+  .surveyPageHeader {
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .backButton {
+    align-self: flex-start;
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .headerContent {
+    text-align: center;
+  }
+  
+  .pageTitle {
+    font-size: 2rem;
+  }
+  
+  .pageDescription {
+    font-size: 1rem;
+  }
+  
+  .resumeNotice {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .resumeText {
+    font-size: 0.8rem;
+  }
+  
+  .submittingCard {
+    padding: 1.5rem;
+    margin: 0.5rem;
+  }
+  
+  .successCard {
+    padding: 2rem 1.5rem;
+    margin: 1rem;
+  }
+  
+  .successIcon {
+    font-size: 3rem;
+  }
+  
+  .successTitle {
+    font-size: 1.75rem;
+  }
+  
+  .successMessage {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .surveyPageContainer {
+    padding: 0.5rem;
+  }
+  
+  .pageTitle {
+    font-size: 1.75rem;
+  }
+  
+  .pageDescription {
+    font-size: 0.95rem;
+  }
+  
+  .resumeNotice {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    margin-bottom: 1rem;
+  }
+  
+  .successCard {
+    padding: 1.5rem 1rem;
+  }
+  
+  .successIcon {
+    font-size: 2.5rem;
+  }
+  
+  .successTitle {
+    font-size: 1.5rem;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .surveyPageContainer {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  }
+  
+  .backButton {
+    background: #1f2937;
+    border-color: #374151;
+    color: #d1d5db;
+  }
+  
+  .backButton:hover {
+    border-color: #60a5fa;
+    color: #60a5fa;
+    background: #1e3a8a;
+  }
+  
+  .pageTitle {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .pageDescription {
+    color: #d1d5db;
+  }
+  
+  .resumeNotice {
+    background: #1e3a8a;
+    border-color: #2563eb;
+    color: #dbeafe;
+  }
+  
+  .submittingCard,
+  .successCard {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .submittingText {
+    color: #f3f4f6;
+  }
+  
+  .successContainer {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+  }
+  
+  .successTitle {
+    color: #a7f3d0;
+  }
+  
+  .successMessage {
+    color: #d1d5db;
+  }
+  
+  .loadingIndicator {
+    background: #064e3b;
+    border-color: #047857;
+  }
+  
+  .loadingText {
+    color: #a7f3d0;
+  }
+  
+  .spinner {
+    border-color: #047857;
+    border-top-color: #10b981;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .surveyPageContainer {
+    background: white;
+    padding: 1rem;
+  }
+  
+  .resumeNotice,
+  .submittingOverlay {
+    display: none;
+  }
+  
+  .backButton {
+    display: none;
+  }
+  
+  .pageTitle {
+    color: black;
+    background: none;
+    -webkit-text-fill-color: initial;
+  }
+}

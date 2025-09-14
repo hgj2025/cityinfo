@@ -1,0 +1,460 @@
+/* 字段容器 */
+.fieldContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* 标签样式 */
+.label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.required {
+  color: #dc2626;
+  font-size: 1.1rem;
+}
+
+/* 字段描述 */
+.fieldDescription {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.5;
+}
+
+/* 输入容器 */
+.inputContainer {
+  position: relative;
+}
+
+/* 基础输入样式 */
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* 错误状态 */
+.inputError {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.inputError:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* 文本域特殊样式 */
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+/* 选择框样式 */
+.select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  appearance: none;
+}
+
+/* 范围输入样式 */
+.rangeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rangeInput {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.rangeInput::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.rangeInput::-webkit-slider-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+}
+
+.rangeInput::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.rangeValue {
+  text-align: center;
+  font-weight: 600;
+  color: #3b82f6;
+  font-size: 1.1rem;
+  padding: 0.5rem;
+  background: #eff6ff;
+  border-radius: 6px;
+}
+
+/* 单选按钮组 */
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.radioLabel:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.radioLabel:has(.radioInput:checked) {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.radioInput {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.radioText {
+  font-weight: 500;
+  color: #374151;
+  flex: 1;
+}
+
+/* 复选框组 */
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.checkboxLabel:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.checkboxLabel:has(.checkboxInput:checked) {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.checkboxInput {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.checkboxText {
+  font-weight: 500;
+  color: #374151;
+  flex: 1;
+}
+
+/* 选项描述 */
+.optionDescription {
+  display: block;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+/* 多选下拉框 */
+.multiselectContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.selectedTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: #3b82f6;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.tagRemove {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.tagRemove:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.multiselectDropdown {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+/* 错误消息 */
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.errorIcon {
+  font-size: 1rem;
+}
+
+.errorText {
+  font-weight: 500;
+}
+
+/* 帮助文本 */
+.helpText {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .radioGroup,
+  .checkboxGroup {
+    gap: 0.5rem;
+  }
+  
+  .radioLabel,
+  .checkboxLabel {
+    padding: 0.75rem;
+  }
+  
+  .input,
+  .textarea,
+  .select {
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .selectedTags {
+    padding: 0.375rem;
+  }
+  
+  .tag {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .radioLabel,
+  .checkboxLabel {
+    padding: 0.625rem;
+    gap: 0.5rem;
+  }
+  
+  .input,
+  .textarea,
+  .select {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .label {
+    color: #f3f4f6;
+  }
+  
+  .fieldDescription,
+  .helpText {
+    color: #d1d5db;
+  }
+  
+  .input,
+  .textarea,
+  .select {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .input:focus,
+  .textarea:focus,
+  .select:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  }
+  
+  .inputError {
+    background: #7f1d1d;
+    border-color: #dc2626;
+  }
+  
+  .radioLabel,
+  .checkboxLabel {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .radioLabel:hover,
+  .checkboxLabel:hover {
+    background: #4b5563;
+    border-color: #60a5fa;
+  }
+  
+  .radioLabel:has(.radioInput:checked),
+  .checkboxLabel:has(.checkboxInput:checked) {
+    background: #1e3a8a;
+    border-color: #60a5fa;
+  }
+  
+  .radioText,
+  .checkboxText {
+    color: #f3f4f6;
+  }
+  
+  .optionDescription {
+    color: #d1d5db;
+  }
+  
+  .selectedTags {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .rangeValue {
+    background: #1e3a8a;
+    color: #93c5fd;
+  }
+  
+  .multiselectDropdown {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .input,
+  .textarea,
+  .select {
+    border-color: #000;
+    background: transparent;
+  }
+  
+  .radioLabel,
+  .checkboxLabel {
+    border-color: #000;
+    background: transparent;
+  }
+}
