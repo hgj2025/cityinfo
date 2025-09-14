@@ -15,10 +15,18 @@ model User {
   password  String
   name      String?
   avatar    String?
+  nationality String?
+  languagePreference String?
+  ageGroup  String?
+  phoneNumber String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   collections Collection[]
+  travelSurveys TravelSurvey[]
+  consultationRequests ConsultationRequest[]
+  callbackRequests CallbackRequest[]
+  emailSubscriptions EmailSubscription[]
 }
 
 model City {
@@ -104,4 +112,161 @@ model Collection {
   hotel        Hotel?      @relation(fields: [itemId], references: [id], map: "Collection_hotel_fkey")
 
   @@unique([userId, itemType, itemId])
+}
+
+// 旅游需求收集相关模型
+model TravelSurvey {
+  id                String   @id @default(uuid())
+  userId            String
+  
+  // 基础信息
+  fullName          String
+  email             String
+  phoneNumber       String?
+  nationality       String
+  languagePreference String
+  ageGroup          String?
+  
+  // 旅游信息
+  plannedCities     String[] // 计划访问的城市ID数组
+  travelStartDate   DateTime?
+  travelEndDate     DateTime?
+  travelDays        Int?
+  groupSize         Int?
+  groupType         String? // family/friends/couple/solo
+  
+  // 需求偏好
+  budgetRange       String? // low/medium/high
+  budgetAmount      Float?
+  budgetCurrency    String?
+  accommodationType String? // hotel/hostel/bnb
+  transportPreference String? // train/flight/car
+  diningPreference  String? // local/international/vegetarian
+  specialNeeds      String[] // accessibility/child-friendly/pet-friendly
+  
+  // 兴趣标签
+  interestTags      String[] // culture/nature/food/entertainment/experience
+  
+  // 表单状态
+  currentStep       Int      @default(1)
+  isCompleted       Boolean  @default(false)
+  completedAt       DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model ConsultationRequest {
+  id                String   @id @default(uuid())
+  userId            String?
+  
+  // 咨询信息
+  type              String   // itinerary/pricing/visa/other
+  urgency           String   // low/medium/high
+  subject           String
+  message           String
+  attachments       String[] // 文件URL数组
+  
+  // 联系偏好
+  preferredContactMethod String // email/phone/video
+  preferredContactTime   DateTime?
+  
+  // 用户上下文
+  viewedCities      String[] // 浏览过的城市ID
+  viewedAttractions String[] // 浏览过的景点ID
+  sessionDuration   Int?     // 会话时长（分钟）
+  
+  // 状态
+  status            String   @default("pending") // pending/processing/completed
+  responseTime      DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User?    @relation(fields: [userId], references: [id])
+}
+
+model CallbackRequest {
+  id                String   @id @default(uuid())
+  userId            String?
+  
+  // 基础信息
+  fullName          String
+  email             String
+  phoneNumber       String
+  timezone          String
+  
+  // 预约信息
+  preferredDate     DateTime
+  preferredTime     String
+  duration          Int      // 预计时长（分钟）
+  languagePreference String
+  
+  // 咨询主题
+  consultationTopic String
+  additionalNotes   String?
+  
+  // 状态
+  status            String   @default("pending") // pending/confirmed/completed/cancelled
+  confirmedAt       DateTime?
+  completedAt       DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User?    @relation(fields: [userId], references: [id])
+}
+
+model EmailSubscription {
+  id                String   @id @default(uuid())
+  userId            String?
+  email             String   @unique
+  
+  // 订阅偏好
+  frequency         String   @default("weekly") // daily/weekly/monthly
+  contentTypes      String[] // guides/deals/news
+  interests         String[] // 兴趣标签
+  
+  // 状态
+  isActive          Boolean  @default(true)
+  subscribedAt      DateTime @default(now())
+  unsubscribedAt    DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User?    @relation(fields: [userId], references: [id])
+}
+
+// 线索评分和管理
+model Lead {
+  id                String   @id @default(uuid())
+  
+  // 关联信息
+  userId            String?
+  surveyId          String?
+  consultationId    String?
+  callbackId        String?
+  
+  // 基础信息
+  email             String
+  fullName          String?
+  phoneNumber       String?
+  
+  // 评分信息
+  qualityScore      Float    @default(0) // 0-100分
+  infoCompleteness  Float    @default(0) // 信息完整度
+  needClarity       Float    @default(0) // 需求明确度
+  purchaseIntent    Float    @default(0) // 购买意向
+  commercialValue   Float    @default(0) // 商业价值
+  
+  // 分发状态
+  status            String   @default("new") // new/assigned/contacted/converted/lost
+  assignedTo        String?  // 分配给的旅行社ID
+  assignedAt        DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }

@@ -10,6 +10,9 @@ import P_traffic_guide from '../pages/p-traffic_guide';
 import P_collection_my from '../pages/p-collection_my';
 import P_search_result from '../pages/p-search_result';
 import P_map_view from '../pages/p-map_view';
+import LoginPage from '../pages/p-auth/LoginPage';
+import RegisterPage from '../pages/p-auth/RegisterPage';
+import SurveyPage from '../pages/SurveyPage';
 import NotFoundPage from './NotFoundPage';
 import ErrorPage from './ErrorPage';
 
@@ -105,6 +108,33 @@ const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <P_map_view />
+      </ErrorBoundary>
+    ),
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: '/login',
+    element: (
+      <ErrorBoundary>
+        <LoginPage />
+      </ErrorBoundary>
+    ),
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: '/register',
+    element: (
+      <ErrorBoundary>
+        <RegisterPage />
+      </ErrorBoundary>
+    ),
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: '/survey',
+    element: (
+      <ErrorBoundary>
+        <SurveyPage />
       </ErrorBoundary>
     ),
     errorElement: <ErrorPage />,

@@ -8,6 +8,10 @@ export interface LoginData {
 
 export interface RegisterData extends LoginData {
   name: string;
+  nationality?: string;
+  languagePreference?: string;
+  ageGroup?: string;
+  phoneNumber?: string;
 }
 
 export interface UserProfile {
@@ -15,6 +19,12 @@ export interface UserProfile {
   email: string;
   name: string;
   avatar?: string;
+  nationality?: string;
+  languagePreference?: string;
+  ageGroup?: string;
+  phoneNumber?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AuthResponse {
@@ -48,6 +58,12 @@ export const authService = {
   // 获取用户信息
   async getProfile(): Promise<UserProfile> {
     const response = await api.get('/auth/profile');
+    return response.data.user;
+  },
+
+  // 更新用户资料
+  async updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {
+    const response = await api.put('/auth/profile', data);
     return response.data.user;
   },
 
