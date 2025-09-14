@@ -7,11 +7,15 @@ import { AppError } from '../middleware/errorHandler';
 const prisma = new PrismaClient();
 
 // Generate JWT token
-const generateToken = (userId: string) => {
+const generateToken = (userId: number): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined');
+  }
   return jwt.sign(
     { userId },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
+    secret,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' } as any
   );
 };
 

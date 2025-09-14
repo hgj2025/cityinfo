@@ -128,5 +128,31 @@ CREATE TRIGGER update_attraction_updated_at BEFORE UPDATE ON "Attraction" FOR EA
 CREATE TRIGGER update_restaurant_updated_at BEFORE UPDATE ON "Restaurant" FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_hotel_updated_at BEFORE UPDATE ON "Hotel" FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- 添加缺失的多语言字段
+-- 为City表添加descriptionEn字段
+ALTER TABLE "City" ADD COLUMN "descriptionEn" TEXT;
+
+-- 为Attraction表添加descriptionEn字段
+ALTER TABLE "Attraction" ADD COLUMN "descriptionEn" TEXT;
+
+-- 为Restaurant表添加descriptionEn字段
+ALTER TABLE "Restaurant" ADD COLUMN "descriptionEn" TEXT;
+
+-- 为Hotel表添加descriptionEn字段
+ALTER TABLE "Hotel" ADD COLUMN "descriptionEn" TEXT;
+
+-- 更新字段为NOT NULL（如果需要的话，可以先设置默认值）
+UPDATE "City" SET "descriptionEn" = description WHERE "descriptionEn" IS NULL;
+UPDATE "Attraction" SET "descriptionEn" = description WHERE "descriptionEn" IS NULL;
+UPDATE "Restaurant" SET "descriptionEn" = description WHERE "descriptionEn" IS NULL;
+UPDATE "Hotel" SET "descriptionEn" = description WHERE "descriptionEn" IS NULL;
+
+-- 设置字段为NOT NULL
+ALTER TABLE "City" ALTER COLUMN "descriptionEn" SET NOT NULL;
+ALTER TABLE "Attraction" ALTER COLUMN "descriptionEn" SET NOT NULL;
+ALTER TABLE "Restaurant" ALTER COLUMN "descriptionEn" SET NOT NULL;
+ALTER TABLE "Hotel" ALTER COLUMN "descriptionEn" SET NOT NULL;
+
 -- 输出初始化完成信息
 SELECT 'CityInfo 数据库初始化完成！' AS message;
+SELECT '多语言字段添加完成！' AS message;

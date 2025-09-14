@@ -12,6 +12,7 @@ export class CityController {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
       const search = req.query.search as string | undefined;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
 
       const skip = (page - 1) * limit;
 
@@ -21,7 +22,8 @@ export class CityController {
             OR: [
               { name: { contains: search } },
               { nameEn: { contains: search } },
-              { description: { contains: search } }
+              { description: { contains: search } },
+              { descriptionEn: { contains: search } }
             ]
           }
         : {};
@@ -39,28 +41,43 @@ export class CityController {
           name: true,
           nameEn: true,
           description: true,
+          descriptionEn: true,
           image: true,
           location: true
         }
       });
+
+      // 根据语言返回相应内容
+      const localizedCities = cities.map((city: any) => ({
+        id: city.id,
+        name: lang === 'en' ? city.nameEn : city.name,
+        nameZh: city.name,
+        nameEn: city.nameEn,
+        description: lang === 'en' ? city.descriptionEn : city.description,
+        descriptionZh: city.description,
+        descriptionEn: city.descriptionEn,
+        image: city.image,
+        location: city.location
+      }));
 
       const totalPages = Math.ceil(total / limit);
 
       res.json({
         status: 'success',
         data: {
-          cities,
+          cities: localizedCities,
           pagination: {
             total,
             page,
             limit,
             pages: totalPages
-          }
+          },
+          language: lang
         }
       });
     } catch (error) {
       logger.error('获取城市列表失败:', error);
-      next(new AppError('获取城市列表失败', 500));
+      next(new AppError(500, '获取城市列表失败'));
     }
   };
 
@@ -68,6 +85,7 @@ export class CityController {
   public getCityById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
 
       const city = await prisma.city.findUnique({
         where: { id },
@@ -78,6 +96,7 @@ export class CityController {
               name: true,
               nameEn: true,
               description: true,
+              descriptionEn: true,
               image: true,
               location: true,
               price: true,
@@ -88,7 +107,9 @@ export class CityController {
             select: {
               id: true,
               name: true,
+              nameEn: true,
               description: true,
+              descriptionEn: true,
               image: true,
               location: true,
               cuisine: true,
@@ -99,7 +120,9 @@ export class CityController {
             select: {
               id: true,
               name: true,
+              nameEn: true,
               description: true,
+              descriptionEn: true,
               image: true,
               location: true,
               priceRange: true,
@@ -110,16 +133,71 @@ export class CityController {
       });
 
       if (!city) {
-        return next(new AppError('城市不存在', 404));
+        return next(new AppError(404, '城市不存在'));
       }
+
+      // 本地化城市数据
+      const localizedCity = {
+        id: city.id,
+        name: lang === 'en' ? city.nameEn : city.name,
+        nameZh: city.name,
+        nameEn: city.nameEn,
+        description: lang === 'en' ? city.descriptionEn : city.description,
+        descriptionZh: city.description,
+        descriptionEn: city.descriptionEn,
+        image: city.image,
+        location: city.location,
+        attractions: city.attractions.map((attraction: any) => ({
+          id: attraction.id,
+          name: lang === 'en' ? attraction.nameEn : attraction.name,
+          nameZh: attraction.name,
+          nameEn: attraction.nameEn,
+          description: lang === 'en' ? attraction.descriptionEn : attraction.description,
+          descriptionZh: attraction.description,
+          descriptionEn: attraction.descriptionEn,
+          image: attraction.image,
+          location: attraction.location,
+          price: attraction.price,
+          openTime: attraction.openTime
+        })),
+        restaurants: city.restaurants.map((restaurant: any) => ({
+          id: restaurant.id,
+          name: lang === 'en' ? restaurant.nameEn : restaurant.name,
+          nameZh: restaurant.name,
+          nameEn: restaurant.nameEn,
+          description: lang === 'en' ? restaurant.descriptionEn : restaurant.description,
+          descriptionZh: restaurant.description,
+          descriptionEn: restaurant.descriptionEn,
+          image: restaurant.image,
+          location: restaurant.location,
+          cuisine: restaurant.cuisine,
+          priceRange: restaurant.priceRange
+        })),
+        hotels: city.hotels.map((hotel: any) => ({
+          id: hotel.id,
+          name: lang === 'en' ? hotel.nameEn : hotel.name,
+          nameZh: hotel.name,
+          nameEn: hotel.nameEn,
+          description: lang === 'en' ? hotel.descriptionEn : hotel.description,
+          descriptionZh: hotel.description,
+          descriptionEn: hotel.descriptionEn,
+          image: hotel.image,
+          location: hotel.location,
+          priceRange: hotel.priceRange,
+          rating: hotel.rating
+        }))
+      };
 
       res.json({
         status: 'success',
-        data: { city }
+        data: { 
+          city: localizedCity,
+          language: lang
+        }
       });
     } catch (error) {
       logger.error('获取城市详情失败:', error);
-      next(new AppError('获取城市详情失败', 500));
+      next(new AppError(500, '获取城市详情失败'));
     }
   };
 }

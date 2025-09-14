@@ -10,7 +10,7 @@ export const validateRequest = (
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map(err => ({
-      field: err.path,
+      field: err.type === 'field' ? err.path : err.type,
       message: err.msg
     }));
     

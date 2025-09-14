@@ -140,7 +140,7 @@ export class SearchController {
       });
     } catch (error) {
       logger.error('搜索失败:', error);
-      next(new AppError('搜索失败', 500));
+      next(new AppError(500, '搜索失败'));
     }
   };
 }

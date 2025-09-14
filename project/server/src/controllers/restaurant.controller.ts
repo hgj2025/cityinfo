@@ -15,6 +15,7 @@ export class RestaurantController {
       const search = req.query.search as string | undefined;
       const cuisine = req.query.cuisine as string | undefined;
       const priceRange = req.query.priceRange as string | undefined;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
 
       const skip = (page - 1) * limit;
 
@@ -26,7 +27,9 @@ export class RestaurantController {
         ...(search && {
           OR: [
             { name: { contains: search } },
-            { description: { contains: search } }
+            { nameEn: { contains: search } },
+            { description: { contains: search } },
+            { descriptionEn: { contains: search } }
           ]
         })
       };
@@ -42,7 +45,9 @@ export class RestaurantController {
         select: {
           id: true,
           name: true,
+          nameEn: true,
           description: true,
+          descriptionEn: true,
           image: true,
           location: true,
           cuisine: true,
@@ -59,23 +64,47 @@ export class RestaurantController {
         }
       });
 
+      // 根据语言返回相应内容
+      const localizedRestaurants = restaurants.map((restaurant: any) => ({
+        id: restaurant.id,
+        name: lang === 'en' ? restaurant.nameEn : restaurant.name,
+        nameZh: restaurant.name,
+        nameEn: restaurant.nameEn,
+        description: lang === 'en' ? restaurant.descriptionEn : restaurant.description,
+        descriptionZh: restaurant.description,
+        descriptionEn: restaurant.descriptionEn,
+        image: restaurant.image,
+        location: restaurant.location,
+        cuisine: restaurant.cuisine,
+        priceRange: restaurant.priceRange,
+        openTime: restaurant.openTime,
+        contactNumber: restaurant.contactNumber,
+        cityId: restaurant.cityId,
+        city: {
+          name: lang === 'en' ? restaurant.city.nameEn : restaurant.city.name,
+          nameZh: restaurant.city.name,
+          nameEn: restaurant.city.nameEn
+        }
+      }));
+
       const totalPages = Math.ceil(total / limit);
 
       res.json({
         status: 'success',
         data: {
-          restaurants,
+          restaurants: localizedRestaurants,
           pagination: {
             total,
             page,
             limit,
             pages: totalPages
-          }
+          },
+          language: lang
         }
       });
     } catch (error) {
       logger.error('获取餐厅列表失败:', error);
-      next(new AppError('获取餐厅列表失败', 500));
+      next(new AppError(500, '获取餐厅列表失败'));
     }
   };
 
@@ -83,6 +112,7 @@ export class RestaurantController {
   public getRestaurantById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
 
       const restaurant = await prisma.restaurant.findUnique({
         where: { id },
@@ -118,16 +148,45 @@ export class RestaurantController {
       });
 
       if (!restaurant) {
-        return next(new AppError('餐厅不存在', 404));
+        return next(new AppError(404, '餐厅不存在'));
       }
+
+      // 本地化餐厅数据
+      const localizedRestaurant = {
+        id: restaurant.id,
+        name: lang === 'en' ? restaurant.nameEn : restaurant.name,
+        nameZh: restaurant.name,
+        nameEn: restaurant.nameEn,
+        description: lang === 'en' ? restaurant.descriptionEn : restaurant.description,
+        descriptionZh: restaurant.description,
+        descriptionEn: restaurant.descriptionEn,
+        image: restaurant.image,
+        location: restaurant.location,
+        cuisine: restaurant.cuisine,
+        priceRange: restaurant.priceRange,
+        openTime: restaurant.openTime,
+        contactNumber: restaurant.contactNumber,
+        cityId: restaurant.cityId,
+        city: {
+          id: restaurant.city.id,
+          name: lang === 'en' ? restaurant.city.nameEn : restaurant.city.name,
+          nameZh: restaurant.city.name,
+          nameEn: restaurant.city.nameEn
+        },
+        menu: restaurant.menu,
+        reviews: restaurant.reviews
+      };
 
       res.json({
         status: 'success',
-        data: { restaurant }
+        data: { 
+          restaurant: localizedRestaurant,
+          language: lang
+        }
       });
     } catch (error) {
       logger.error('获取餐厅详情失败:', error);
-      next(new AppError('获取餐厅详情失败', 500));
+      next(new AppError(500, '获取餐厅详情失败'));
     }
   };
 }

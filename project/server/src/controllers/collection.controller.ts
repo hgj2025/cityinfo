@@ -15,7 +15,7 @@ export class CollectionController {
       // 检查项目是否存在
       const item = await this.checkItemExists(itemType, itemId);
       if (!item) {
-        return next(new AppError('收藏项目不存在', 404));
+        return next(new AppError(404, '收藏项目不存在'));
       }
 
       // 检查是否已收藏
@@ -28,7 +28,7 @@ export class CollectionController {
       });
 
       if (existingCollection) {
-        return next(new AppError('已经收藏过该项目', 400));
+        return next(new AppError(400, '已经收藏过该项目'));
       }
 
       // 创建收藏
@@ -46,7 +46,7 @@ export class CollectionController {
       });
     } catch (error) {
       logger.error('添加收藏失败:', error);
-      next(new AppError('添加收藏失败', 500));
+      next(new AppError(500, '添加收藏失败'));
     }
   };
 
@@ -90,7 +90,7 @@ export class CollectionController {
 
       // 获取收藏项目的详细信息
       const collectionsWithItems = await Promise.all(
-        collections.map(async (collection) => {
+        collections.map(async (collection: any) => {
           const item = await this.getItemDetails(collection.itemType, collection.itemId);
           return {
             ...collection,
@@ -115,7 +115,7 @@ export class CollectionController {
       });
     } catch (error) {
       logger.error('获取收藏列表失败:', error);
-      next(new AppError('获取收藏列表失败', 500));
+      next(new AppError(500, '获取收藏列表失败'));
     }
   };
 
@@ -133,7 +133,7 @@ export class CollectionController {
       });
 
       if (!collection) {
-        return next(new AppError('收藏不存在', 404));
+        return next(new AppError(404, '收藏不存在'));
       }
 
       await prisma.collection.delete({
@@ -146,7 +146,7 @@ export class CollectionController {
       });
     } catch (error) {
       logger.error('删除收藏失败:', error);
-      next(new AppError('删除收藏失败', 500));
+      next(new AppError(500, '删除收藏失败'));
     }
   };
 
@@ -173,7 +173,7 @@ export class CollectionController {
       });
     } catch (error) {
       logger.error('检查收藏状态失败:', error);
-      next(new AppError('检查收藏状态失败', 500));
+      next(new AppError(500, '检查收藏状态失败'));
     }
   };
 

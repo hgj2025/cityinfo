@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authRouter } from './auth.routes';
+import authRouter from './auth.routes';
 import { cityRouter } from './city.routes';
 import { attractionRouter } from './attraction.routes';
 import { restaurantRouter } from './restaurant.routes';

@@ -26,6 +26,7 @@ model City {
   name        String
   nameEn      String
   description String
+  descriptionEn String
   image       String
   location    String
   createdAt   DateTime @default(now())
@@ -41,6 +42,7 @@ model Attraction {
   name        String
   nameEn      String
   description String
+  descriptionEn String
   image       String
   location    String
   price       Float?
@@ -58,6 +60,7 @@ model Restaurant {
   name        String
   nameEn      String
   description String
+  descriptionEn String
   image       String
   location    String
   priceRange  String
@@ -75,6 +78,7 @@ model Hotel {
   name        String
   nameEn      String
   description String
+  descriptionEn String
   image       String
   location    String
   priceRange  String
@@ -95,9 +99,9 @@ model Collection {
   createdAt    DateTime @default(now())
 
   user         User       @relation(fields: [userId], references: [id])
-  attraction   Attraction? @relation(fields: [itemId], references: [id])
-  restaurant   Restaurant? @relation(fields: [itemId], references: [id])
-  hotel        Hotel?      @relation(fields: [itemId], references: [id])
+  attraction   Attraction? @relation(fields: [itemId], references: [id], map: "Collection_attraction_fkey")
+  restaurant   Restaurant? @relation(fields: [itemId], references: [id], map: "Collection_restaurant_fkey")
+  hotel        Hotel?      @relation(fields: [itemId], references: [id], map: "Collection_hotel_fkey")
 
   @@unique([userId, itemType, itemId])
 }

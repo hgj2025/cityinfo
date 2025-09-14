@@ -15,6 +15,7 @@ export class HotelController {
       const search = req.query.search as string | undefined;
       const priceRange = req.query.priceRange as string | undefined;
       const rating = req.query.rating ? Number(req.query.rating) : undefined;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
 
       const skip = (page - 1) * limit;
 
@@ -26,7 +27,9 @@ export class HotelController {
         ...(search && {
           OR: [
             { name: { contains: search } },
-            { description: { contains: search } }
+            { nameEn: { contains: search } },
+            { description: { contains: search } },
+            { descriptionEn: { contains: search } }
           ]
         })
       };
@@ -42,7 +45,9 @@ export class HotelController {
         select: {
           id: true,
           name: true,
+          nameEn: true,
           description: true,
+          descriptionEn: true,
           image: true,
           location: true,
           priceRange: true,
@@ -59,23 +64,47 @@ export class HotelController {
         }
       });
 
+      // 根据语言返回相应内容
+      const localizedHotels = hotels.map((hotel: any) => ({
+        id: hotel.id,
+        name: lang === 'en' ? hotel.nameEn : hotel.name,
+        nameZh: hotel.name,
+        nameEn: hotel.nameEn,
+        description: lang === 'en' ? hotel.descriptionEn : hotel.description,
+        descriptionZh: hotel.description,
+        descriptionEn: hotel.descriptionEn,
+        image: hotel.image,
+        location: hotel.location,
+        priceRange: hotel.priceRange,
+        rating: hotel.rating,
+        amenities: hotel.amenities,
+        contactNumber: hotel.contactNumber,
+        cityId: hotel.cityId,
+        city: {
+          name: lang === 'en' ? hotel.city.nameEn : hotel.city.name,
+          nameZh: hotel.city.name,
+          nameEn: hotel.city.nameEn
+        }
+      }));
+
       const totalPages = Math.ceil(total / limit);
 
       res.json({
         status: 'success',
         data: {
-          hotels,
+          hotels: localizedHotels,
           pagination: {
             total,
             page,
             limit,
             pages: totalPages
-          }
+          },
+          language: lang
         }
       });
     } catch (error) {
       logger.error('获取酒店列表失败:', error);
-      next(new AppError('获取酒店列表失败', 500));
+      next(new AppError(500, '获取酒店列表失败'));
     }
   };
 
@@ -83,6 +112,7 @@ export class HotelController {
   public getHotelById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
 
       const hotel = await prisma.hotel.findUnique({
         where: { id },
@@ -128,16 +158,45 @@ export class HotelController {
       });
 
       if (!hotel) {
-        return next(new AppError('酒店不存在', 404));
+        return next(new AppError(404, '酒店不存在'));
       }
+
+      // 本地化酒店数据
+      const localizedHotel = {
+        id: hotel.id,
+        name: lang === 'en' ? hotel.nameEn : hotel.name,
+        nameZh: hotel.name,
+        nameEn: hotel.nameEn,
+        description: lang === 'en' ? hotel.descriptionEn : hotel.description,
+        descriptionZh: hotel.description,
+        descriptionEn: hotel.descriptionEn,
+        image: hotel.image,
+        location: hotel.location,
+        priceRange: hotel.priceRange,
+        rating: hotel.rating,
+        amenities: hotel.amenities,
+        contactNumber: hotel.contactNumber,
+        cityId: hotel.cityId,
+        city: {
+          id: hotel.city.id,
+          name: lang === 'en' ? hotel.city.nameEn : hotel.city.name,
+          nameZh: hotel.city.name,
+          nameEn: hotel.city.nameEn
+        },
+        rooms: hotel.rooms,
+        reviews: hotel.reviews
+      };
 
       res.json({
         status: 'success',
-        data: { hotel }
+        data: { 
+          hotel: localizedHotel,
+          language: lang
+        }
       });
     } catch (error) {
       logger.error('获取酒店详情失败:', error);
-      next(new AppError('获取酒店详情失败', 500));
+      next(new AppError(500, '获取酒店详情失败'));
     }
   };
 }

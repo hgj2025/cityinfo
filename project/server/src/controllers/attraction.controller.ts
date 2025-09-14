@@ -13,6 +13,7 @@ export class AttractionController {
       const limit = Number(req.query.limit) || 10;
       const cityId = req.query.cityId as string | undefined;
       const search = req.query.search as string | undefined;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
 
       const skip = (page - 1) * limit;
 
@@ -23,7 +24,8 @@ export class AttractionController {
           OR: [
             { name: { contains: search } },
             { nameEn: { contains: search } },
-            { description: { contains: search } }
+            { description: { contains: search } },
+            { descriptionEn: { contains: search } }
           ]
         })
       };
@@ -41,6 +43,7 @@ export class AttractionController {
           name: true,
           nameEn: true,
           description: true,
+          descriptionEn: true,
           image: true,
           location: true,
           price: true,
@@ -55,23 +58,45 @@ export class AttractionController {
         }
       });
 
+      // 根据语言返回相应内容
+      const localizedAttractions = attractions.map((attraction: any) => ({
+        id: attraction.id,
+        name: lang === 'en' ? attraction.nameEn : attraction.name,
+        nameZh: attraction.name,
+        nameEn: attraction.nameEn,
+        description: lang === 'en' ? attraction.descriptionEn : attraction.description,
+        descriptionZh: attraction.description,
+        descriptionEn: attraction.descriptionEn,
+        image: attraction.image,
+        location: attraction.location,
+        price: attraction.price,
+        openTime: attraction.openTime,
+        cityId: attraction.cityId,
+        city: {
+          name: lang === 'en' ? attraction.city.nameEn : attraction.city.name,
+          nameZh: attraction.city.name,
+          nameEn: attraction.city.nameEn
+        }
+      }));
+
       const totalPages = Math.ceil(total / limit);
 
       res.json({
         status: 'success',
         data: {
-          attractions,
+          attractions: localizedAttractions,
           pagination: {
             total,
             page,
             limit,
             pages: totalPages
-          }
+          },
+          language: lang
         }
       });
     } catch (error) {
       logger.error('获取景点列表失败:', error);
-      next(new AppError('获取景点列表失败', 500));
+      next(new AppError(500, '获取景点列表失败'));
     }
   };
 
@@ -79,6 +104,7 @@ export class AttractionController {
   public getAttractionById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
 
       const attraction = await prisma.attraction.findUnique({
         where: { id },
@@ -113,16 +139,42 @@ export class AttractionController {
       });
 
       if (!attraction) {
-        return next(new AppError('景点不存在', 404));
+        return next(new AppError(404, '景点不存在'));
       }
+
+      // 本地化景点数据
+      const localizedAttraction = {
+        id: attraction.id,
+        name: lang === 'en' ? attraction.nameEn : attraction.name,
+        nameZh: attraction.name,
+        nameEn: attraction.nameEn,
+        description: lang === 'en' ? attraction.descriptionEn : attraction.description,
+        descriptionZh: attraction.description,
+        descriptionEn: attraction.descriptionEn,
+        image: attraction.image,
+        location: attraction.location,
+        price: attraction.price,
+        openTime: attraction.openTime,
+        cityId: attraction.cityId,
+        city: {
+          id: attraction.city.id,
+          name: lang === 'en' ? attraction.city.nameEn : attraction.city.name,
+          nameZh: attraction.city.name,
+          nameEn: attraction.city.nameEn
+        },
+        reviews: attraction.reviews
+      };
 
       res.json({
         status: 'success',
-        data: { attraction }
+        data: { 
+          attraction: localizedAttraction,
+          language: lang
+        }
       });
     } catch (error) {
       logger.error('获取景点详情失败:', error);
-      next(new AppError('获取景点详情失败', 500));
+      next(new AppError(500, '获取景点详情失败'));
     }
   };
 }
