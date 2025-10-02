@@ -34,4 +34,21 @@ router.get(
   cityController.getCityById
 );
 
+// 获取城市概览信息
+router.get(
+  '/:id/overview',
+  idValidation,
+  validateRequest,
+  cityController.getCityOverview
+);
+
+// 创建或更新城市概览信息
+router.put(
+  '/:id/overview',
+  idValidation,
+  authenticate,
+  validateRequest,
+  cityController.upsertCityOverview
+);
+
 export { router as cityRouter };

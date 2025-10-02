@@ -200,4 +200,181 @@ export class CityController {
       next(new AppError(500, '获取城市详情失败'));
     }
   };
+
+  // 获取城市概览信息
+  public getCityOverview = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const lang = req.query.lang as string || 'zh'; // 默认中文
+
+      const cityOverview = await prisma.cityOverview.findUnique({
+        where: { cityId: id },
+        include: {
+          city: {
+            select: {
+              id: true,
+              name: true,
+              nameEn: true
+            }
+          }
+        }
+      });
+
+      if (!cityOverview) {
+        return next(new AppError(404, '城市概览信息不存在'));
+      }
+
+      // 本地化概览数据
+      const localizedOverview = {
+        id: cityOverview.id,
+        cityId: cityOverview.cityId,
+        city: {
+          id: cityOverview.city.id,
+          name: lang === 'en' ? cityOverview.city.nameEn : cityOverview.city.name
+        },
+        history: {
+          title: lang === 'en' ? cityOverview.historyTitleEn : cityOverview.historyTitle,
+          content: lang === 'en' ? cityOverview.historyContentEn : cityOverview.historyContent,
+          image: cityOverview.historyImage
+        },
+        culture: {
+          title: lang === 'en' ? cityOverview.cultureTitleEn : cityOverview.cultureTitle,
+          content: lang === 'en' ? cityOverview.cultureContentEn : cityOverview.cultureContent,
+          image: cityOverview.cultureImage
+        },
+        customs: {
+          title: lang === 'en' ? cityOverview.customsTitleEn : cityOverview.customsTitle,
+          content: lang === 'en' ? cityOverview.customsContentEn : cityOverview.customsContent,
+          image: cityOverview.customsImage
+        },
+        heritageItems: lang === 'en' ? cityOverview.heritageItemsEn : cityOverview.heritageItems,
+        festivals: lang === 'en' ? cityOverview.festivalsEn : cityOverview.festivals,
+        historicalStories: lang === 'en' ? cityOverview.historicalStoriesEn : cityOverview.historicalStories,
+        createdAt: cityOverview.createdAt,
+        updatedAt: cityOverview.updatedAt
+      };
+
+      res.json({
+        status: 'success',
+        data: {
+          overview: localizedOverview,
+          language: lang
+        }
+      });
+    } catch (error) {
+      logger.error('获取城市概览失败:', error);
+      next(new AppError(500, '获取城市概览失败'));
+    }
+  };
+
+  // 创建或更新城市概览信息
+  public upsertCityOverview = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const {
+        historyTitle,
+        historyTitleEn,
+        historyContent,
+        historyContentEn,
+        historyImage,
+        cultureTitle,
+        cultureTitleEn,
+        cultureContent,
+        cultureContentEn,
+        cultureImage,
+        customsTitle,
+        customsTitleEn,
+        customsContent,
+        customsContentEn,
+        customsImage,
+        heritageItems,
+        heritageItemsEn,
+        festivals,
+        festivalsEn,
+        historicalStories,
+        historicalStoriesEn
+      } = req.body;
+
+      // 验证城市是否存在
+      const city = await prisma.city.findUnique({
+        where: { id }
+      });
+
+      if (!city) {
+        return next(new AppError(404, '城市不存在'));
+      }
+
+      // 创建或更新城市概览
+      const cityOverview = await prisma.cityOverview.upsert({
+        where: { cityId: id },
+        update: {
+          historyTitle,
+          historyTitleEn,
+          historyContent,
+          historyContentEn,
+          historyImage,
+          cultureTitle,
+          cultureTitleEn,
+          cultureContent,
+          cultureContentEn,
+          cultureImage,
+          customsTitle,
+          customsTitleEn,
+          customsContent,
+          customsContentEn,
+          customsImage,
+          heritageItems,
+          heritageItemsEn,
+          festivals,
+          festivalsEn,
+          historicalStories,
+          historicalStoriesEn
+        },
+        create: {
+          cityId: id,
+          historyTitle,
+          historyTitleEn,
+          historyContent,
+          historyContentEn,
+          historyImage,
+          cultureTitle,
+          cultureTitleEn,
+          cultureContent,
+          cultureContentEn,
+          cultureImage,
+          customsTitle,
+          customsTitleEn,
+          customsContent,
+          customsContentEn,
+          customsImage,
+          heritageItems,
+          heritageItemsEn,
+          festivals,
+          festivalsEn,
+          historicalStories,
+          historicalStoriesEn
+        },
+        include: {
+          city: {
+            select: {
+              id: true,
+              name: true,
+              nameEn: true
+            }
+          }
+        }
+      });
+
+      res.json({
+        status: 'success',
+        data: {
+          overview: cityOverview,
+          message: '城市概览信息保存成功'
+        }
+      });
+    } catch (error) {
+      logger.error('保存城市概览失败:', error);
+      next(new AppError(500, '保存城市概览失败'));
+    }
+  };
 }

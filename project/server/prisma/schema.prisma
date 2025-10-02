@@ -44,6 +44,50 @@ model City {
   attractions Attraction[]
   restaurants Restaurant[]
   hotels      Hotel[]
+  overview    CityOverview?
+}
+
+model CityOverview {
+  id          String   @id @default(uuid())
+  cityId      String   @unique
+  
+  // 历史沿革
+  historyTitle       String?
+  historyTitleEn     String?
+  historyContent     String?
+  historyContentEn   String?
+  historyImage       String?
+  
+  // 文化特色
+  cultureTitle       String?
+  cultureTitleEn     String?
+  cultureContent     String?
+  cultureContentEn   String?
+  cultureImage       String?
+  
+  // 风俗习惯
+  customsTitle       String?
+  customsTitleEn     String?
+  customsContent     String?
+  customsContentEn   String?
+  customsImage       String?
+  
+  // 艺术与非物质文化遗产
+  heritageItems      Json?    // 存储艺术非遗项目数组
+  heritageItemsEn    Json?    // 英文版本
+  
+  // 节庆活动
+  festivals          Json?    // 存储节庆活动数组
+  festivalsEn        Json?    // 英文版本
+  
+  // 名人与历史故事
+  historicalStories  Json?    // 存储历史故事数组
+  historicalStoriesEn Json?   // 英文版本
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  city        City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
 }
 
 model Attraction {
