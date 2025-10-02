@@ -39,7 +39,7 @@ export const collectionService = {
     itemType?: CollectionItemType;
   } = {}): Promise<PaginatedResponse<Collection>> {
     const response = await api.get('/collections', { params });
-    return response;
+    return response.data;
   },
 
   // 删除收藏
@@ -68,6 +68,6 @@ export const searchService = {
     type?: CollectionItemType | 'city';
   }): Promise<PaginatedResponse<SearchResult>> {
     const response = await api.get('/search', { params });
-    return response;
+    return response.data;
   },
 };

@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { AppError } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient() as any;
 
 export class HotelController {
   // 获取酒店列表

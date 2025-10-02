@@ -41,7 +41,7 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
       // 处理其他错误
-      const errorMessage = error.response.data?.message || '请求失败';
+      const errorMessage = (error.response.data as any)?.message || '请求失败';
       console.error(`[API Error] ${errorMessage}`);
     } else if (error.request) {
       console.error('[API Error] 网络请求失败');

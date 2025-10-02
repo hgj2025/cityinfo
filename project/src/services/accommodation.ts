@@ -46,7 +46,7 @@ export const restaurantService = {
     priceRange?: string;
   } = {}): Promise<PaginatedResponse<Restaurant>> {
     const response = await api.get('/restaurants', { params });
-    return response;
+    return response.data;
   },
 
   // 获取餐厅详情
@@ -65,7 +65,7 @@ export const hotelService = {
     rating?: number;
   } = {}): Promise<PaginatedResponse<Hotel>> {
     const response = await api.get('/hotels', { params });
-    return response;
+    return response.data;
   },
 
   // 获取酒店详情

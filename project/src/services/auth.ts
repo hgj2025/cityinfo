@@ -33,6 +33,7 @@ export interface AuthResponse {
     user: UserProfile;
     token: string;
   };
+  token?: string;
 }
 
 // 认证服务
@@ -40,19 +41,19 @@ export const authService = {
   // 用户登录
   async login(data: LoginData): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/login', data);
-    if (response.data?.token) {
-      localStorage.setItem('token', response.data.token);
+    if (response.data?.data?.token) {
+      localStorage.setItem('token', response.data.data.token);
     }
-    return response;
+    return response.data;
   },
 
   // 用户注册
   async register(data: RegisterData): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/register', data);
-    if (response.data?.token) {
-      localStorage.setItem('token', response.data.token);
+    if (response.data?.data?.token) {
+      localStorage.setItem('token', response.data.data.token);
     }
-    return response;
+    return response.data;
   },
 
   // 获取用户信息
