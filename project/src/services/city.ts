@@ -111,7 +111,13 @@ export const cityService = {
   // 获取景点列表
   async getAttractions(params: PaginationParams & { cityId?: string } = {}): Promise<PaginatedResponse<Attraction>> {
     const response = await api.get('/attractions', { params });
-    return response.data;
+    return {
+      status: response.status,
+      data: {
+        items: response.data.attractions,
+        pagination: response.data.pagination
+      }
+    };
   },
 
   // 获取景点详情

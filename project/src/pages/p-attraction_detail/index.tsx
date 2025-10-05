@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import styles from './styles.module.css';
 
 // Components
 import Header from './components/Header';
@@ -14,7 +13,6 @@ import Toast from './components/Toast';
 
 const AttractionDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const attractionId = searchParams.get('attraction_id') || 'greatwall';
   
   const [showShareModal, setShowShareModal] = useState(false);
   const [toast, setToast] = useState({ message: '', visible: false });
@@ -48,13 +46,7 @@ const AttractionDetail: React.FC = () => {
     showToast('报告生成成功，请在"我的收藏"中查看');
   };
 
-  const handleCollectStatusChange = (isCollected: boolean) => {
-    showToast(isCollected ? '已取消收藏' : '收藏成功');
-  };
 
-  const handleMapNavigation = () => {
-    showToast('已打开地图导航');
-  };
 
   return (
     <div className="bg-bg-light min-h-screen">

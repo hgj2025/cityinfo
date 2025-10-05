@@ -1,13 +1,11 @@
 
-import { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../../styles.module.css';
 
 const Header = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(prev => !prev);
+    // TODO: Implement mobile menu toggle functionality
   };
 
   return (

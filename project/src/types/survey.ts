@@ -61,11 +61,12 @@ export interface SurveyField {
   id: string;
   name: keyof TravelPreferences;
   label: string;
-  type: 'text' | 'select' | 'multiselect' | 'radio' | 'checkbox' | 'range' | 'number';
+  type: 'text' | 'email' | 'textarea' | 'select' | 'multiselect' | 'radio' | 'checkbox' | 'range' | 'number';
   options?: SurveyOption[];
   placeholder?: string;
   validation?: FieldValidation;
   helpText?: string;
+  description?: string;
   isRequired: boolean;
 }
 
@@ -80,6 +81,9 @@ export interface FieldValidation {
   required?: boolean;
   min?: number;
   max?: number;
+  step?: number;
+  unit?: string;
+  rows?: number;
   pattern?: string;
   custom?: (value: any) => string | null;
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SurveyStep as SurveyStepType, SurveyField, TravelPreferences } from '../../types/survey';
+import { SurveyStep as SurveyStepType, TravelPreferences } from '../../types/survey';
 import SurveyFieldComponent from './SurveyField';
 import styles from './SurveyStep.module.css';
 

@@ -1,7 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import Backend from 'i18next-http-backend';
 
 // 导入翻译资源
 import zhTranslation from './locales/zh.json';
@@ -25,7 +24,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'zh', // 默认语言
-    debug: process.env.NODE_ENV === 'development',
+    debug: import.meta.env.DEV,
     
     interpolation: {
       escapeValue: false // React 已经默认转义了

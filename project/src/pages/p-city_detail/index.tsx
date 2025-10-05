@@ -6,7 +6,7 @@ import styles from './styles.module.css';
 // 组件导入
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Sidebar from './components/Sidebar';
+import Sidebar from './components/SideBar';
 import CityHeader from './components/CityHeader';
 import OverviewSection from './components/OverviewSection';
 import AttractionSection from './components/AttractionSection';

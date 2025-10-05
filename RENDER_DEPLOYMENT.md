@@ -41,7 +41,7 @@
 3. 配置服务：
    - **Name**: `cityinfo-backend`
    - **Environment**: `Node`
-   - **Build Command**: `cd project/server && npm install && npm run build && npx prisma generate`
+   - **Build Command**: `cd project/server && chmod +x scripts/deploy.sh && ./scripts/deploy.sh`
    - **Start Command**: `cd project/server && npm start`
    - **Plan**: Starter (免费)
 
@@ -55,6 +55,18 @@
    LOG_LEVEL=info
    ALLOWED_ORIGINS=https://cityinfo-frontend.onrender.com
    ```
+
+   **重要：DATABASE_URL 配置说明**
+   - 在 Render Dashboard 中，进入你创建的 PostgreSQL 数据库
+   - 在 "Info" 标签页中找到 "External Database URL"
+   - 复制完整的连接字符串，格式应该是：
+     ```
+     postgresql://username:password@hostname:port/database_name
+     ```
+   - 确保连接字符串包含用户名和密码，例如：
+     ```
+     postgresql://cityinfo_user:your_password@dpg-xxxxx-a.oregon-postgres.render.com:5432/cityinfo_db
+     ```
 
 5. 高级设置：
    - **Health Check Path**: `/api/v1/health`
@@ -170,6 +182,11 @@ curl -X POST https://cityinfo-backend.onrender.com/api/v1/cities/initialize-over
 - 在部署脚本中使用 `npx prisma generate` 和 `npx prisma migrate deploy`
 
 ### 4. 数据库连接失败
+如果遇到 `FATAL: no PostgreSQL user name specified in startup packet` 错误：
+- 检查 `DATABASE_URL` 环境变量是否包含用户名和密码
+- 确保 DATABASE_URL 格式正确：`postgresql://username:password@hostname:port/database_name`
+- 在 Render Dashboard 的数据库页面复制完整的 "External Database URL"
+- 不要使用 "Internal Database URL"，它不包含认证信息
 - 确认 `DATABASE_URL` 环境变量正确设置
 - 检查数据库服务是否正常运行
 - 验证 Prisma 迁移是否成功执行

@@ -9,7 +9,7 @@ import SettingsContent from './components/SettingsContent';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import GenerateReportModal from './components/GenerateReportModal';
 import { CollectionItem, ReportItem, UserInfo } from './types';
-import styles from './styles.module.css';
+
 
 const CollectionMyPage: React.FC = () => {
   // Set page title
