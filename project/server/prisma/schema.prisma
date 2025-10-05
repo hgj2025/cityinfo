@@ -84,6 +84,10 @@ model CityOverview {
   historicalStories  Json?    // 存储历史故事数组
   historicalStoriesEn Json?   // 英文版本
   
+  // 图片数据存储
+  pictureAdvises     Json?    // 存储图片建议数组
+  pictures           Json?    // 存储图片数据数组
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   

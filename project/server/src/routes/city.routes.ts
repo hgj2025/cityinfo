@@ -3,6 +3,7 @@ import { validateRequest } from '../middleware/validateRequest';
 import { authenticate } from '../middleware/authenticate';
 import { CityController } from '../controllers/city.controller';
 import { query, param } from 'express-validator';
+import { initializeCityOverviewValidation } from '../validators/city.validators';
 
 const router = Router();
 const cityController = new CityController();
@@ -40,6 +41,14 @@ router.get(
   idValidation,
   validateRequest,
   cityController.getCityOverview
+);
+
+// 根据initcity.json格式初始化城市概览信息
+router.post(
+  '/initialize-overview',
+  initializeCityOverviewValidation,
+  validateRequest,
+  cityController.initializeCityOverview
 );
 
 // 创建或更新城市概览信息

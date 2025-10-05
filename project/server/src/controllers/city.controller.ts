@@ -267,6 +267,163 @@ export class CityController {
     }
   };
 
+  // 根据initcity.json格式初始化城市概览信息
+  public initializeCityOverview = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { city, content, pictureAdvises, pictures } = req.body;
+
+      if (!city || !content) {
+        return next(new AppError(400, '城市名称和内容数据不能为空'));
+      }
+
+      // 解析content JSON字符串
+      let parsedContent;
+      try {
+        parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+      } catch (error) {
+        return next(new AppError(400, '内容数据格式错误，必须是有效的JSON'));
+      }
+
+      // 查找或创建城市
+      let cityRecord = await prisma.city.findFirst({
+        where: {
+          OR: [
+            { name: city },
+            { nameEn: city }
+          ]
+        }
+      });
+
+      if (!cityRecord) {
+        // 如果城市不存在，创建新城市
+        cityRecord = await prisma.city.create({
+          data: {
+            name: city,
+            nameEn: city, // 可以后续更新
+            description: parsedContent.history?.cityinfo || `${city}是一座历史悠久的城市`,
+            descriptionEn: `${city} is a city with rich history`,
+            image: '', // 可以从pictures中提取
+            location: city
+          }
+        });
+      }
+
+      // 转换数据格式
+      const overviewData = {
+        cityId: cityRecord.id,
+        
+        // 历史沿革
+        historyTitle: '历史沿革',
+        historyTitleEn: 'Historical Evolution',
+        historyContent: [
+          parsedContent.history?.cityinfo,
+          parsedContent.history?.history,
+          parsedContent.history?.importantEvent
+        ].filter(Boolean).join('\n\n'),
+        historyContentEn: 'Historical content in English', // 可以后续翻译
+        historyImage: pictureAdvises?.[0] || '',
+        
+        // 文化特色
+        cultureTitle: '文化特色',
+        cultureTitleEn: 'Cultural Features',
+        cultureContent: [
+          parsedContent.culture?.culture,
+          parsedContent.culture?.goodCulture,
+          parsedContent.culture?.legacy,
+          parsedContent.culture?.historyPlace
+        ].filter(Boolean).join('\n\n'),
+        cultureContentEn: 'Cultural content in English',
+        cultureImage: pictureAdvises?.[1] || '',
+        
+        // 风俗习惯
+        customsTitle: '风俗习惯',
+        customsTitleEn: 'Customs and Traditions',
+        customsContent: [
+          parsedContent.tradition?.tradition,
+          parsedContent.tradition?.bigday,
+          parsedContent.tradition?.food,
+          parsedContent.tradition?.daily
+        ].filter(Boolean).join('\n\n'),
+        customsContentEn: 'Customs content in English',
+        customsImage: pictureAdvises?.[2] || '',
+        
+        // 艺术与非物质文化遗产
+        heritageItems: Array.isArray(parsedContent.art) ? parsedContent.art.map((item: any) => ({
+          itemName: item.itemName || '',
+          desc: item.desc || '',
+          history: item.history || '',
+          pictureAdvise: item.pictureAdvise || ''
+        })) : [],
+        heritageItemsEn: [], // 可以后续翻译
+        
+        // 节庆活动
+        festivals: Array.isArray(parsedContent.activity) ? parsedContent.activity.map((item: any) => ({
+          activityName: item.activityName || '',
+          activityTime: item.activityTime || '',
+          activityContent: item.activityContent || '',
+          pictureAdvise: item.pictureAdvise || ''
+        })) : [],
+        festivalsEn: [], // 可以后续翻译
+        
+        // 名人与历史故事
+        historicalStories: Array.isArray(parsedContent.hero) ? parsedContent.hero.map((item: any) => ({
+          name: item.name || '',
+          desc: item.desc || '',
+          story: item.story || '',
+          pictureAdvise: item.pictureAdvise || ''
+        })) : [],
+        historicalStoriesEn: [], // 可以后续翻译
+        
+        // 图片数据存储
+        pictureAdvises: Array.isArray(pictureAdvises) ? pictureAdvises : 
+          (typeof pictureAdvises === 'string' ? 
+            (() => {
+              try {
+                return JSON.parse(pictureAdvises);
+              } catch {
+                return [pictureAdvises];
+              }
+            })() : []),
+        pictures: Array.isArray(pictures) ? pictures : 
+          (typeof pictures === 'string' ? 
+            (() => {
+              try {
+                return JSON.parse(pictures);
+              } catch {
+                return [pictures];
+              }
+            })() : [])
+      };
+
+      // 创建或更新城市概览
+      const cityOverview = await prisma.cityOverview.upsert({
+        where: { cityId: cityRecord.id },
+        update: overviewData,
+        create: overviewData,
+        include: {
+          city: {
+            select: {
+              id: true,
+              name: true,
+              nameEn: true
+            }
+          }
+        }
+      });
+
+      res.json({
+        status: 'success',
+        data: {
+          overview: cityOverview,
+          message: `${city}城市概览信息初始化成功`
+        }
+      });
+    } catch (error) {
+      logger.error('初始化城市概览失败:', error);
+      next(new AppError(500, '初始化城市概览失败'));
+    }
+  };
+
   // 创建或更新城市概览信息
   public upsertCityOverview = async (req: Request, res: Response, next: NextFunction) => {
     try {
