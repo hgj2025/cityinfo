@@ -1,0 +1,230 @@
+# CityInfo 项目 Render 部署指南
+
+本文档详细说明如何将 CityInfo 项目部署到 Render 平台。
+
+## 项目架构
+
+- **前端**: React + TypeScript + Vite (静态站点)
+- **后端**: Node.js + Express + TypeScript (Web服务)
+- **数据库**: PostgreSQL
+- **部署平台**: Render
+
+## 部署前准备
+
+### 1. 代码准备
+确保以下文件已正确配置：
+- `project/server/render.yaml` - 后端服务配置
+- `project/render.yaml` - 前端应用配置
+- `project/server/.env.production` - 生产环境变量模板
+
+### 2. GitHub 仓库
+将代码推送到 GitHub 仓库，Render 将从此仓库部署。
+
+## 部署步骤
+
+### 第一步：部署数据库
+
+1. 登录 [Render Dashboard](https://dashboard.render.com)
+2. 点击 "New +" → "PostgreSQL"
+3. 配置数据库：
+   - **Name**: `cityinfo-db`
+   - **Database**: `cityinfo`
+   - **User**: `cityinfo`
+   - **Plan**: Starter (免费)
+4. 点击 "Create Database"
+5. 记录数据库连接信息（稍后配置后端时使用）
+
+### 第二步：部署后端服务
+
+1. 点击 "New +" → "Web Service"
+2. 连接 GitHub 仓库
+3. 配置服务：
+   - **Name**: `cityinfo-backend`
+   - **Environment**: `Node`
+   - **Build Command**: `cd project/server && npm install && npm run build && npx prisma generate`
+   - **Start Command**: `cd project/server && npm start`
+   - **Plan**: Starter (免费)
+
+4. 配置环境变量：
+   ```
+   NODE_ENV=production
+   PORT=10000
+   DATABASE_URL=[从第一步创建的数据库获取]
+   JWT_SECRET=[生成一个强密码]
+   JWT_EXPIRES_IN=7d
+   LOG_LEVEL=info
+   ALLOWED_ORIGINS=https://cityinfo-frontend.onrender.com
+   ```
+
+5. 高级设置：
+   - **Health Check Path**: `/api/v1/health`
+   - **Auto-Deploy**: Yes
+
+6. 点击 "Create Web Service"
+
+### 第三步：部署前端应用
+
+1. 点击 "New +" → "Static Site"
+2. 连接同一个 GitHub 仓库
+3. 配置站点：
+   - **Name**: `cityinfo-frontend`
+   - **Build Command**: `cd project && npm install && npm run build`
+   - **Publish Directory**: `project/dist`
+
+4. 配置环境变量：
+   ```
+   VITE_API_BASE_URL=https://cityinfo-backend.onrender.com/api/v1
+   VITE_APP_TITLE=CityInfo - 智能旅游指南
+   ```
+
+5. 点击 "Create Static Site"
+
+### 第四步：数据库迁移
+
+后端服务部署完成后，数据库迁移会自动执行。如需手动执行：
+
+1. 在后端服务的 "Shell" 标签页中执行：
+   ```bash
+   npx prisma migrate deploy
+   npx prisma generate
+   ```
+
+### 第五步：初始化城市数据（可选）
+
+1. 确保 `initcity.json` 文件在 `project/server/scripts/` 目录中
+2. 在后端服务的 "Shell" 标签页中执行：
+   ```bash
+   curl -X POST https://cityinfo-backend.onrender.com/api/v1/cities/initialize-overview \
+     -H "Content-Type: application/json" \
+     -d @scripts/initcity.json
+   ```
+
+## 环境变量配置详解
+
+### 后端环境变量
+
+| 变量名 | 描述 | 示例值 |
+|--------|------|--------|
+| `NODE_ENV` | 运行环境 | `production` |
+| `PORT` | 服务端口 | `10000` |
+| `DATABASE_URL` | 数据库连接字符串 | `postgresql://user:pass@host:5432/db` |
+| `JWT_SECRET` | JWT密钥 | `your-secret-key` |
+| `JWT_EXPIRES_IN` | JWT过期时间 | `7d` |
+| `LOG_LEVEL` | 日志级别 | `info` |
+| `ALLOWED_ORIGINS` | CORS允许的源 | `https://your-frontend.onrender.com` |
+
+### 前端环境变量
+
+| 变量名 | 描述 | 示例值 |
+|--------|------|--------|
+| `VITE_API_BASE_URL` | 后端API地址 | `https://your-backend.onrender.com/api/v1` |
+| `VITE_APP_TITLE` | 应用标题 | `CityInfo - 智能旅游指南` |
+
+## 部署后验证
+
+### 1. 检查服务状态
+- 后端健康检查: `https://cityinfo-backend.onrender.com/api/v1/health`
+- 前端访问: `https://cityinfo-frontend.onrender.com`
+
+### 2. 测试API功能
+```bash
+# 测试城市列表API
+curl https://cityinfo-backend.onrender.com/api/v1/cities
+
+# 测试城市初始化API
+curl -X POST https://cityinfo-backend.onrender.com/api/v1/cities/initialize-overview \
+  -H "Content-Type: application/json" \
+  -d '{"city":"测试城市","content":"{}","pictureAdvises":"[]","pictures":"[]"}'
+```
+
+## 常见问题
+
+### 1. 构建失败
+- 检查 `package.json` 中的构建脚本
+- 确保所有依赖都在 `dependencies` 中（不是 `devDependencies`）
+- 检查 TypeScript 编译错误
+
+### 2. TypeScript 类型声明错误
+如果遇到类似 `Could not find a declaration file for module 'express'` 的错误：
+- 确保所有 `@types/*` 包都在 `dependencies` 中而不是 `devDependencies`
+- 在生产环境中，Render 默认不安装 `devDependencies`
+- 特别需要移动到 `dependencies` 的包：
+  - `@types/express`
+  - `@types/node`
+  - `@types/cors`
+  - `@types/morgan`
+  - `typescript`
+- 使用 `npm ci` 而不是 `npm install` 确保依赖版本一致性
+
+### 3. 数据库连接失败
+- 确认 `DATABASE_URL` 环境变量正确设置
+- 检查数据库服务是否正常运行
+- 验证 Prisma 迁移是否成功执行
+
+### 4. CORS 错误
+- 确认后端 `ALLOWED_ORIGINS` 包含前端域名
+- 检查前端 `VITE_API_BASE_URL` 是否正确
+
+### 5. 静态文件路由问题
+- 确认前端配置了 SPA 路由重写规则
+- 检查 `dist` 目录是否正确生成
+
+## 监控和维护
+
+### 1. 日志查看
+- 在 Render Dashboard 中查看服务日志
+- 后端日志包含 API 请求和错误信息
+- 前端构建日志显示编译过程
+
+### 2. 性能监控
+- 使用 Render 提供的监控面板
+- 关注响应时间和错误率
+- 监控数据库连接数和查询性能
+
+### 3. 自动部署
+- 推送到 `main` 分支自动触发部署
+- 可以在 Render Dashboard 中暂停自动部署
+- 支持手动触发重新部署
+
+## 成本优化
+
+### 免费套餐限制
+- 静态站点：100GB 带宽/月
+- Web 服务：750 小时/月
+- PostgreSQL：1GB 存储，90天数据保留
+
+### 升级建议
+- 生产环境建议使用付费套餐
+- 考虑使用 CDN 加速静态资源
+- 定期备份数据库数据
+
+## 安全建议
+
+1. **环境变量安全**
+   - 使用强密码作为 JWT_SECRET
+   - 定期轮换敏感密钥
+   - 不要在代码中硬编码密钥
+
+2. **CORS 配置**
+   - 只允许必要的域名
+   - 避免使用通配符 `*`
+
+3. **数据库安全**
+   - 使用 Render 提供的加密连接
+   - 定期更新依赖包
+   - 监控异常访问
+
+## 联系支持
+
+如果遇到部署问题：
+1. 查看 Render 官方文档
+2. 检查服务日志
+3. 联系 Render 技术支持
+4. 参考项目 GitHub Issues
+
+---
+
+**部署完成后，你的应用将在以下地址可用：**
+- 前端: `https://cityinfo-frontend.onrender.com`
+- 后端: `https://cityinfo-backend.onrender.com`
+- API文档: `https://cityinfo-backend.onrender.com/api/v1/health`

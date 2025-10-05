@@ -1,0 +1,25 @@
+services:
+  # 前端静态站点
+  - type: web
+    name: cityinfo-frontend
+    env: static
+    plan: starter
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: false
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://cityinfo-backend.onrender.com/api/v1
+      - key: VITE_APP_TITLE
+        value: CityInfo - 智能旅游指南
