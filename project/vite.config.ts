@@ -28,5 +28,12 @@ export default defineConfig(({ mode }) => ({
   plugins: [react(), mode === 'development' ? errorLoggerPlugin() : null,],
   server: {
     allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 }));

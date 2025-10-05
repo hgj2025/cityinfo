@@ -51,6 +51,13 @@ router.post(
   cityController.initializeCityOverview
 );
 
+// 批量初始化城市数据
+router.post(
+  '/initialize-data',
+  validateRequest,
+  cityController.initializeCitiesFromData
+);
+
 // 创建或更新城市概览信息
 router.put(
   '/:id/overview',

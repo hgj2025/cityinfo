@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { SurveyFormData, TravelPreferences } from '../types/survey';
 
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+const API_BASE_URL = 'http://localhost:3001/api/v1';
 
 // 创建axios实例
 const api = axios.create({

@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
 
 // API基础配置
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+const API_BASE_URL = 'http://localhost:3001/api/v1';
 
 // 创建axios实例
 const api: AxiosInstance = axios.create({

@@ -377,3 +377,39 @@ model Lead {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
+
+model CollectionTask {
+  id          String   @id @default(uuid())
+  city        String
+  dataType    String   // 'attraction', 'restaurant', 'hotel'
+  status      String   @default("pending") // 'pending', 'running', 'completed', 'failed'
+  progress    Int      @default(0)
+  result      Json?
+  error       String?
+  
+  // Coze API 详情信息
+  cozeRequest Json?    // 存储发送给Coze的请求参数
+  cozeResponse Json?   // 存储Coze的原始响应
+  cozeApiCalls Json?   // 存储所有API调用的详细记录
+  parseError  String?  // 存储数据解析错误信息
+  
+  // 任务执行详情
+  executionSteps Json? // 存储任务执行的各个步骤
+  dataProcessing Json? // 存储数据处理过程
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DataReview {
+  id          String   @id @default(uuid())
+  taskId      String
+  dataType    String   // 'attraction', 'restaurant', 'hotel'
+  data        Json
+  status      String   @default("pending") // 'pending', 'approved', 'rejected'
+  reviewerId  String?
+  reviewNotes String?
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

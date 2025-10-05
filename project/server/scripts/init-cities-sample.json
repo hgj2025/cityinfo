@@ -1,0 +1,193 @@
+{
+  "data": {
+    "users": [
+      {
+        "id": "ae5f7b62-40fe-4834-a823-96942d9eccce",
+        "email": "test@example.com",
+        "password": "$2a$10$KcDOI4zRv1R.pFhaoIt4DezGBTomNXwaHOJy6FxX/tceONgUzq9oK",
+        "name": "Test User",
+        "avatar": null,
+        "nationality": "US",
+        "languagePreference": "en",
+        "ageGroup": "25-34",
+        "phoneNumber": null,
+        "createdAt": "2025-09-14T11:27:08.428Z",
+        "updatedAt": "2025-09-14T11:27:08.428Z"
+      },
+      {
+        "id": "bd90b58e-8d6b-4dce-81f0-202e9db7ecd3",
+        "email": "admin2@example.com",
+        "password": "$2a$12$NRNbORgH6zn9QMIVXEP/7ujDRgLsFTj51MxFs90dYl26XlHMvAt.i",
+        "name": "管理员2",
+        "avatar": null,
+        "nationality": null,
+        "languagePreference": null,
+        "ageGroup": null,
+        "phoneNumber": null,
+        "createdAt": "2025-10-02T02:24:40.209Z",
+        "updatedAt": "2025-10-02T02:24:40.209Z"
+      }
+    ],
+    "cities": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440001",
+        "name": "东京",
+        "nameEn": "Tokyo",
+        "description": "日本繁华的首都，以现代摩天大楼、传统寺庙和充满活力的文化而闻名。",
+        "descriptionEn": "The bustling capital of Japan, known for its modern skyscrapers, traditional temples, and vibrant culture.",
+        "image": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+        "location": "Japan",
+        "createdAt": "2025-09-14T11:27:36.551Z",
+        "updatedAt": "2025-09-14T11:27:36.551Z"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440002",
+        "name": "巴黎",
+        "nameEn": "Paris",
+        "description": "光之城，以艺术、时尚、美食和文化而闻名。",
+        "descriptionEn": "The City of Light, famous for its art, fashion, gastronomy, and culture.",
+        "image": "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=800",
+        "location": "France",
+        "createdAt": "2025-09-14T11:27:36.554Z",
+        "updatedAt": "2025-09-14T11:27:36.554Z"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440004",
+        "name": "南京",
+        "nameEn": "Nanjing",
+        "description": "南京，简称\"宁\"，古称金陵、建康，是江苏省省会、副省级市、特大城市、南京都市圈核心城市，国务院批复确定的中国东部地区重要的中心城市、全国重要的科研教育基地和综合交通枢纽。",
+        "descriptionEn": "Nanjing, abbreviated as \"Ning\", formerly known as Jinling and Jiankang, is the capital city of Jiangsu Province, a sub-provincial city, megacity, and core city of Nanjing Metropolitan Area.",
+        "image": "https://images.unsplash.com/photo-1555921015-5532091f6026",
+        "location": "Jiangsu Province, China",
+        "createdAt": "2025-10-02T02:34:43.783Z",
+        "updatedAt": "2025-10-02T02:34:43.783Z"
+      }
+    ],
+    "cityOverviews": [
+      {
+        "id": "overview-550e8400-e29b-41d4-a716-446655440004",
+        "cityId": "550e8400-e29b-41d4-a716-446655440004",
+        "historyTitle": "历史沿革",
+        "historyTitleEn": "Historical Evolution",
+        "historyContent": "南京，简称'宁'，古称金陵、建康，位于江苏省西南部，长江下游沿岸，是江苏省省会、副省级市，中国东部地区重要的中心城市。南京有超过6000年的文明史，2500多年的建城史，约450年的建都史。早在新石器时代，就有人类在此繁衍生息；公元前472年越王勾践建'越城'，是南京建城之始；此后，东吴、东晋、宋、齐、梁、陈（六朝）在此建都，奠定'六朝古都'地位；南唐、明初、太平天国、中华民国也先后定都，故称'十朝都会'。",
+        "historyContentEn": "Historical content in English",
+        "historyImage": "https://images.unsplash.com/photo-1555921015-5532091f6026",
+        "cultureTitle": "文化特色",
+        "cultureTitleEn": "Cultural Features",
+        "cultureContent": "南京文化融合南北、兼容并蓄，既有江南细腻雅致，又有北方大气雄浑，是六朝文化、明文化、民国文化的叠加体，形成'多元共生'独特气质。历史文化积淀深厚，六朝时期书法（王羲之）、绘画（顾恺之、陆探微、张僧繇）、文学（刘义庆《世说新语》）达高峰；明代诗词戏曲兴盛；民国时期新文化运动蓬勃发展，传承至今。",
+        "cultureContentEn": "Cultural content in English",
+        "cultureImage": "https://images.unsplash.com/photo-1555921015-5532091f6026",
+        "customsTitle": "风俗习惯",
+        "customsTitleEn": "Customs and Traditions",
+        "customsContent": "南京人性格豪爽直率又细腻，喜欢'摆龙门阵'（围坐聊天），重视家庭团聚；日常讲究'慢生活'，早上喝早茶，傍晚逛老街，生活气息浓厚。春节逛夫子庙灯会（赏灯、猜谜），元宵节吃汤圆逛灯市；中秋游玄武湖（赏月、放河灯）；冬至吃'冬至团'（糯米团）或饺子，寓意团圆。",
+        "customsContentEn": "Customs content in English",
+        "customsImage": "https://images.unsplash.com/photo-1555921015-5532091f6026",
+        "heritageItems": [
+          {
+            "desc": "中国四大名锦之一，以金线、银线和蚕丝为原料，采用'通经断纬'工艺织造，图案精美、色彩绚丽，有'寸锦寸金'之称。",
+            "history": "始于东晋，明清为皇家御用贡品（用于龙袍、凤冠），传承1600多年，2006年列入国家级非物质文化遗产。",
+            "itemName": "南京云锦",
+            "pictureAdvise": "南京云锦研究所内的传统大花楼木织机（两人操作）、云锦龙袍成品展示"
+          },
+          {
+            "desc": "金箔薄如蝉翼（厚度仅0.12微米），质地柔软，用于佛像贴金、建筑装饰、工艺品制作，是南京'隐形名片'。",
+            "history": "始于东晋，唐代成贡品，明清用于皇家建筑（如故宫太和殿），2006年列入国家级非物质文化遗产。",
+            "itemName": "南京金箔",
+            "pictureAdvise": "金箔艺人用竹刀切割金箔的场景、明孝陵碑亭内贴金的碑文"
+          }
+        ],
+        "heritageItemsEn": [],
+        "festivals": [
+          {
+            "activityName": "夫子庙秦淮灯会",
+            "activityTime": "每年春节至元宵节（正月初一至正月十八）",
+            "pictureAdvise": "夫子庙大成殿广场的巨型灯组、游客举着小灯逛秦淮河畔、艺人现场制作灯彩",
+            "activityContent": "主要活动有赏灯展（夫子庙、秦淮河沿岸挂花灯）、猜灯谜（灯附谜面，猜对有小礼品）、非遗表演（云锦织造、秦淮灯彩制作）、小吃市集（鸭血粉丝汤、小笼包等）。"
+          },
+          {
+            "activityName": "南京国际梅花节",
+            "activityTime": "每年2月至3月（梅花盛开期）",
+            "pictureAdvise": "梅花山漫山遍野的梅花、游客在梅树下拍照、艺人制作梅花糕的场景",
+            "activityContent": "主会场在明孝陵梅花山（中国四大梅园之一），活动有赏梅（300多种）、梅花摄影展、文艺演出（民歌、京剧）、梅花糕制作体验。"
+          }
+        ],
+        "festivalsEn": [],
+        "historicalStories": [
+          {
+            "desc": "东晋著名书法家，被誉为\"书圣\"，代表作《兰亭集序》（天下第一行书），书法\"飘若浮云，矫若惊龙\"，影响深远。",
+            "name": "王羲之",
+            "story": "王羲之曾在南京任\"右军将军\"，常与友人雅集留下\"曲水流觞\"典故；夫子庙有\"王羲之墨宝\"展，王谢故居与他有关，是南京书法文化象征。",
+            "pictureAdvise": "夫子庙内的王羲之雕像、《兰亭集序》摹本的展示牌、王谢故居的\"曲水流觞\"场景"
+          }
+        ],
+        "historicalStoriesEn": [],
+        "pictureAdvises": [
+          "六朝博物馆内的青瓷莲花尊、明故宫遗址的石柱础、南京大屠杀遇难同胞纪念馆的和平钟",
+          "夫子庙大成殿的\"天下文枢\"匾额、南京云锦博物馆内的传统织造机、中山陵从碑亭到祭堂的台阶全景"
+        ],
+        "pictures": [],
+        "createdAt": "2025-10-02T02:34:43.788Z",
+        "updatedAt": "2025-10-05T02:32:28.842Z"
+      }
+    ],
+    "attractions": [],
+    "restaurants": [],
+    "hotels": [],
+    "collections": [],
+    "travelPlans": [],
+    "consultationRequests": [],
+    "callbackRequests": [],
+    "emailSubscriptions": [],
+    "surveyResponses": [
+      {
+        "id": "46bd433c-4802-43d8-8ad9-a91defefb31e",
+        "userId": null,
+        "travelStyle": "cultural",
+        "budgetRange": "mid_range",
+        "travelDuration": "7-14天",
+        "groupSize": 2,
+        "travelCompanions": ["伴侣"],
+        "preferredDestinations": ["东南亚", "欧洲"],
+        "climatePreference": "温带",
+        "seasonPreference": ["春季", "秋季"],
+        "domesticVsInternational": "国际",
+        "activityTypes": ["文化体验", "美食探索"],
+        "accommodationType": "hotel",
+        "transportationMode": ["飞机", "火车"],
+        "diningPreferences": ["当地特色", "素食选项"],
+        "accessibilityNeeds": [],
+        "dietaryRestrictions": [],
+        "languageBarriers": null,
+        "safetyPriority": 4,
+        "interests": ["摄影", "徒步", "美食"],
+        "travelExperience": null,
+        "previousDestinations": [],
+        "informationSources": [],
+        "bookingPreferences": [],
+        "currentStep": 3,
+        "totalSteps": 5,
+        "isCompleted": false,
+        "completedAt": null,
+        "lastSavedAt": "2025-09-14T12:11:29.794Z",
+        "completedFields": [
+          "travelStyle",
+          "budgetRange",
+          "travelDuration",
+          "groupSize",
+          "travelCompanions",
+          "preferredDestinations",
+          "climatePreference",
+          "seasonPreference",
+          "domesticVsInternational",
+          "activityTypes",
+          "accommodationType",
+          "transportationMode",
+          "currentStep"
+        ],
+        "validationErrors": null,
+        "createdAt": "2025-09-14T12:11:29.766Z",
+        "updatedAt": "2025-09-14T12:11:29.796Z"
+      }
+    ]
+  }
+}

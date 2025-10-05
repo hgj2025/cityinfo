@@ -1,0 +1,171 @@
+.dashboard {
+  padding: 0;
+}
+
+.title {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.cardIcon {
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(24, 144, 255, 0.1);
+  border-radius: 8px;
+}
+
+.cardContent {
+  flex: 1;
+}
+
+.cardValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #262626;
+  margin-bottom: 4px;
+}
+
+.cardTitle {
+  font-size: 14px;
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.activitySection {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #fafafa;
+  transition: background-color 0.2s;
+}
+
+.activityItem:hover {
+  background-color: #f0f0f0;
+}
+
+.activityIcon {
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityMessage {
+  font-size: 14px;
+  color: #262626;
+  margin-bottom: 2px;
+}
+
+.activityTime {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.quickActions {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #1890ff;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionBtn:hover {
+  background-color: #40a9ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .actionBtn {
+    justify-content: center;
+  }
+}
