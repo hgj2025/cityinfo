@@ -80,7 +80,7 @@
 2. 连接同一个 GitHub 仓库
 3. 配置站点：
    - **Name**: `cityinfo-frontend`
-   - **Build Command**: `cd project && npm install && npm run build`
+   - **Build Command**: `cd project && chmod +x scripts/deploy-frontend.sh && ./scripts/deploy-frontend.sh`
    - **Publish Directory**: `project/dist`
 
 4. 配置环境变量：

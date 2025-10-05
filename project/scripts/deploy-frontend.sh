@@ -7,7 +7,7 @@ echo "开始部署CityInfo前端应用..."
 
 # 安装依赖
 echo "安装依赖包..."
-npm install
+npm ci
 
 # 构建生产版本
 echo "构建生产版本..."
