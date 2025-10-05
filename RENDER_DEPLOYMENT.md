@@ -199,6 +199,115 @@ curl -X POST https://cityinfo-backend.onrender.com/api/v1/cities/initialize-over
 - 确认前端配置了 SPA 路由重写规则
 - 检查 `dist` 目录是否正确生成
 
+## 数据迁移
+
+### 从本地数据库迁移到 Render
+
+如果你有本地开发数据需要迁移到 Render 的生产数据库，可以使用以下步骤：
+
+#### 1. 导出本地数据
+
+在本地项目目录中运行数据导出脚本：
+
+```bash
+# 进入后端目录
+cd project/server
+
+# 运行数据导出脚本
+node scripts/export-data.js
+```
+
+导出脚本将：
+- 连接到本地数据库
+- 导出所有表的数据为 JSON 格式
+- 生成带时间戳的数据文件（如：`cityinfo-data-export-2024-01-01T12-00-00.json`）
+- 显示导出统计信息
+
+#### 2. 上传数据文件到 Render
+
+有几种方式将数据文件传输到 Render 服务器：
+
+**方式一：通过 Git 仓库**
+```bash
+# 将数据文件添加到项目中（临时）
+git add project/server/scripts/cityinfo-data-export-*.json
+git commit -m "Add data export for migration"
+git push origin main
+```
+
+**方式二：通过 Render Shell**
+- 在 Render Dashboard 中打开后端服务
+- 使用 "Shell" 功能上传文件
+- 或通过 `curl` 从外部 URL 下载
+
+#### 3. 导入数据到 Render 数据库
+
+在 Render 后端服务的 Shell 中运行：
+
+```bash
+# 进入脚本目录
+cd scripts
+
+# 运行数据导入脚本
+node import-data.js cityinfo-data-export-2024-01-01T12-00-00.json
+```
+
+导入脚本将：
+- 读取导出的 JSON 数据文件
+- 按正确的依赖关系顺序导入数据
+- 使用 `upsert` 操作避免重复数据
+- 显示导入进度和统计信息
+
+#### 4. 验证数据迁移
+
+导入完成后，验证数据是否正确迁移：
+
+```bash
+# 检查数据库连接
+npx prisma db pull
+
+# 查看数据统计
+node -e "const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); (async () => { console.log('Users:', await prisma.user.count()); console.log('Cities:', await prisma.city.count()); console.log('Attractions:', await prisma.attraction.count()); await prisma.$disconnect(); })();"
+```
+
+#### 5. 清理临时文件
+
+迁移完成后，从 Git 仓库中移除数据文件：
+
+```bash
+# 删除数据文件
+git rm project/server/scripts/cityinfo-data-export-*.json
+git commit -m "Remove temporary data export file"
+git push origin main
+```
+
+### 注意事项
+
+1. **数据安全**：
+   - 数据文件可能包含敏感信息，迁移后及时删除
+   - 不要将包含用户数据的文件长期保存在 Git 仓库中
+
+2. **数据一致性**：
+   - 确保本地和生产环境使用相同的数据库 schema
+   - 运行 `npx prisma db push` 确保 schema 同步
+
+3. **大数据量处理**：
+   - 如果数据量很大，考虑分批导入
+   - 可以设置环境变量 `CLEAR_EXISTING_DATA=true` 清空现有数据（谨慎使用）
+
+4. **回滚计划**：
+   - 在导入前备份 Render 数据库
+   - 准备回滚脚本以防导入失败
+
+### 定期数据备份
+
+建议设置定期数据备份：
+
+```bash
+# 创建定期备份脚本
+echo "0 2 * * * cd /opt/render/project/src/scripts && node export-data.js" | crontab -
+```
+
 ## 监控和维护
 
 ### 1. 日志查看
