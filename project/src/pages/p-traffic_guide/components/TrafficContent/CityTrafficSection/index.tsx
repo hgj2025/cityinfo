@@ -1,8 +1,5 @@
 
-import { useState } from 'react';
-
 const CityTrafficSection = () => {
-  const [showMetroMap, setShowMetroMap] = useState(false);
 
   const handleMetroMapClick = (e: React.MouseEvent) => {
     e.preventDefault();

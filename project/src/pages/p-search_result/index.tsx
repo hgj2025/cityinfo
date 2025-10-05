@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import styles from './styles.module.css';
+import { useSearchParams } from 'react-router-dom';
 import Header from './components/Header';
 import MobileSearch from './components/MobileSearch';
 import FilterToolbar from './components/FilterToolbar';

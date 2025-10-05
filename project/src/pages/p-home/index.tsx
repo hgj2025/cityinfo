@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 
 // 导入组件
@@ -16,7 +16,6 @@ import Footer from './components/Footer';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   // 设置页面标题
   useEffect(() => {
@@ -26,13 +25,6 @@ const HomePage = () => {
       document.title = originalTitle;
     };
   }, []);
-
-  // 搜索功能
-  const handleSearch = (keyword: string) => {
-    if (keyword.trim()) {
-      navigate(`/search-result?keyword=${encodeURIComponent(keyword.trim())}`);
-    }
-  };
 
   return (
     <div className={styles.pageWrapper}>

@@ -8,7 +8,7 @@ interface HeaderProps {
   cityId: CityId;
 }
 
-const Header = ({ cityId }: HeaderProps) => {
+const Header = ({}: HeaderProps) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleMobileMenuClick = () => {

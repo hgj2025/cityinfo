@@ -94,7 +94,7 @@ export const cityService = {
     // axios拦截器已经提取了data，所以response就是API的响应体
     // 需要转换为PaginatedResponse格式：{status: string, data: {items: [...], pagination: {...}}}
     return {
-      status: response.status,
+      status: String(response.status),
       data: {
         items: response.data.cities,
         pagination: response.data.pagination
@@ -112,7 +112,7 @@ export const cityService = {
   async getAttractions(params: PaginationParams & { cityId?: string } = {}): Promise<PaginatedResponse<Attraction>> {
     const response = await api.get('/attractions', { params });
     return {
-      status: response.status,
+      status: String(response.status),
       data: {
         items: response.data.attractions,
         pagination: response.data.pagination

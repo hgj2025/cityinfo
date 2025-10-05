@@ -1,7 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import styles from './styles.module.css';
 import Header from './components/Header';
 import MobileSearch from './components/MobileSearch';
 import MapHeader from './components/MapHeader';
@@ -12,7 +10,6 @@ import InfoDrawer from './components/InfoDrawer';
 import { CityData, AttractionData } from './types';
 
 const MapView = () => {
-  const navigate = useNavigate();
   const [infoDrawerOpen, setInfoDrawerOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [selectedItemType, setSelectedItemType] = useState<'city' | 'attraction' | null>(null);

@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Header from './components/Header';
 import MobileSearch from './components/MobileSearch';
 import SideMenu from './components/SideMenu';
@@ -8,7 +8,6 @@ import TrafficContent from './components/TrafficContent';
 import Footer from './components/Footer';
 import ShareModal from './components/ShareModal';
 import CollectToast from './components/CollectToast';
-import styles from './styles.module.css';
 
 const TrafficGuidePage = () => {
   const [searchParams] = useSearchParams();

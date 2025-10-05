@@ -83,7 +83,7 @@ const RegisterPage: React.FC = () => {
       newErrors.confirmPassword = '两次输入的密码不一致';
     }
 
-    if (!formData.nationality.trim()) {
+    if (!formData.nationality?.trim()) {
       newErrors.nationality = '请输入国籍';
     }
 

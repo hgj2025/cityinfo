@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 // Components
 import Header from './components/Header';
@@ -12,7 +12,6 @@ import ShareModal from './components/ShareModal';
 import Toast from './components/Toast';
 
 const AttractionDetail: React.FC = () => {
-  const [searchParams] = useSearchParams();
   
   const [showShareModal, setShowShareModal] = useState(false);
   const [toast, setToast] = useState({ message: '', visible: false });
