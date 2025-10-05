@@ -148,6 +148,7 @@ curl -X POST https://cityinfo-backend.onrender.com/api/v1/cities/initialize-over
 如果遇到类似 `Could not find a declaration file for module 'express'` 的错误：
 - 确保所有 `@types/*` 包都在 `dependencies` 中而不是 `devDependencies`
 - 在生产环境中，Render 默认不安装 `devDependencies`
+
 - 特别需要移动到 `dependencies` 的包：
   - `@types/express`
   - `@types/node`
@@ -158,19 +159,26 @@ curl -X POST https://cityinfo-backend.onrender.com/api/v1/cities/initialize-over
 - 使用 `npm ci` 而不是 `npm install` 确保依赖版本一致性
 - 如果遇到 `Module '@prisma/client' has no exported member 'PrismaClient'` 错误：
   - 确保 `prisma` 包在 `dependencies` 中
-  - 添加 `"postinstall": "prisma generate"` 脚本到 `package.json`
+  - 添加 `"postinstall": "npx prisma generate"` 脚本到 `package.json`
   - 确保构建命令中包含 `npx prisma generate`
 
-### 3. 数据库连接失败
+### 3. Prisma 权限错误
+如果遇到 `sh: 1: prisma: Permission denied` 错误：
+- 确保在 `package.json` 的 `scripts` 中使用 `npx prisma` 而不是直接的 `prisma`
+- 检查 `postinstall` 脚本：应该是 `"postinstall": "npx prisma generate"`
+- 确保 `prisma` 包在 `dependencies` 中而不是 `devDependencies`
+- 在部署脚本中使用 `npx prisma generate` 和 `npx prisma migrate deploy`
+
+### 4. 数据库连接失败
 - 确认 `DATABASE_URL` 环境变量正确设置
 - 检查数据库服务是否正常运行
 - 验证 Prisma 迁移是否成功执行
 
-### 4. CORS 错误
+### 5. CORS 错误
 - 确认后端 `ALLOWED_ORIGINS` 包含前端域名
 - 检查前端 `VITE_API_BASE_URL` 是否正确
 
-### 5. 静态文件路由问题
+### 6. 静态文件路由问题
 - 确认前端配置了 SPA 路由重写规则
 - 检查 `dist` 目录是否正确生成
 
