@@ -15,7 +15,7 @@ import FoodRecommendations from './components/FoodRecommendations';
 import Footer from './components/Footer';
 
 const HomePage = () => {
-  const navigate = useNavigate();
+  useNavigate();
 
   // 设置页面标题
   useEffect(() => {
