@@ -154,7 +154,12 @@ curl -X POST https://cityinfo-backend.onrender.com/api/v1/cities/initialize-over
   - `@types/cors`
   - `@types/morgan`
   - `typescript`
+  - `prisma`（用于生成Prisma客户端）
 - 使用 `npm ci` 而不是 `npm install` 确保依赖版本一致性
+- 如果遇到 `Module '@prisma/client' has no exported member 'PrismaClient'` 错误：
+  - 确保 `prisma` 包在 `dependencies` 中
+  - 添加 `"postinstall": "prisma generate"` 脚本到 `package.json`
+  - 确保构建命令中包含 `npx prisma generate`
 
 ### 3. 数据库连接失败
 - 确认 `DATABASE_URL` 环境变量正确设置
