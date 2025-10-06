@@ -399,6 +399,9 @@ model CollectionTask {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  // 关联的审核数据
+  cozeReviews CozeReviewData[]
 }
 
 model DataReview {
@@ -412,4 +415,33 @@ model DataReview {
   reviewedAt  DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Coze数据审核模型
+model CozeReviewData {
+  id              String   @id @default(uuid())
+  taskId          String   // 关联的采集任务ID
+  dataType        String   // 数据类型: 'city_overview', 'attraction', 'restaurant', 'hotel'
+  
+  // 原始数据
+  data            Json     // 存储Coze采集的原始数据
+  
+  // 审核状态
+  status          String   @default("pending") // 'pending', 'approved', 'rejected'
+  reviewerId      String?  // 审核员ID
+  reviewerName    String?  // 审核员姓名
+  notes           String?  // 审核备注
+  selectedImages  Json?    // 审核时选择的图片
+  
+  // 时间戳
+  createdAt       DateTime @default(now())
+  reviewedAt      DateTime?
+  updatedAt       DateTime @updatedAt
+  
+  // 关联任务
+  task            CollectionTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([dataType])
+  @@index([createdAt])
 }

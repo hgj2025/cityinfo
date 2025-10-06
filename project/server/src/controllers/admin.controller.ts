@@ -54,6 +54,557 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 };
 
 /**
+ * 获取采集任务数据并格式化为审核数据
+ */
+export const getCollectionTaskReviews = async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    // 获取指定任务的详情
+    const task = await prisma.collectionTask.findUnique({
+      where: { id: taskId }
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        status: 'error',
+        message: '任务不存在'
+      });
+    }
+
+    // 解析任务的cozeResponse数据
+    const cozeResponse = task.cozeResponse as any;
+    if (!cozeResponse || !cozeResponse.data || !Array.isArray(cozeResponse.data)) {
+      return res.json({
+        status: 'success',
+        data: {
+          reviews: [],
+          total: 0,
+          page,
+          limit
+        }
+      });
+    }
+
+    // 将采集数据转换为审核格式
+    const allReviews: any[] = [];
+    
+    for (const cityData of cozeResponse.data) {
+      // 处理历史文化数据
+      if (cityData.history) {
+        allReviews.push({
+          id: `${taskId}-history-${Date.now()}`,
+          taskId: taskId,
+          dataType: 'city_overview',
+          status: 'pending',
+          data: {
+            name: `${task.city} - 历史文化`,
+            type: 'history',
+            content: cityData.history,
+            images: cityData.pictures || []
+          },
+          submittedAt: task.createdAt.toISOString(),
+          reviewedAt: null,
+          reviewerId: null,
+          reviewerName: null,
+          notes: null
+        });
+      }
+
+      // 处理文化特色数据
+      if (cityData.culture) {
+        allReviews.push({
+          id: `${taskId}-culture-${Date.now()}`,
+          taskId: taskId,
+          dataType: 'city_overview',
+          status: 'pending',
+          data: {
+            name: `${task.city} - 文化特色`,
+            type: 'culture',
+            content: cityData.culture,
+            images: cityData.pictures || []
+          },
+          submittedAt: task.createdAt.toISOString(),
+          reviewedAt: null,
+          reviewerId: null,
+          reviewerName: null,
+          notes: null
+        });
+      }
+
+      // 处理艺术与非物质文化遗产
+      if (cityData.art && Array.isArray(cityData.art)) {
+        cityData.art.forEach((artItem: any, index: number) => {
+          allReviews.push({
+            id: `${taskId}-art-${index}-${Date.now()}`,
+            taskId: taskId,
+            dataType: 'art_heritage',
+            status: 'pending',
+            data: {
+              name: artItem.itemName || `${task.city} - 艺术遗产 ${index + 1}`,
+              description: artItem.desc,
+              history: artItem.history,
+              pictureAdvise: artItem.pictureAdvise,
+              images: cityData.pictures || []
+            },
+            submittedAt: task.createdAt.toISOString(),
+            reviewedAt: null,
+            reviewerId: null,
+            reviewerName: null,
+            notes: null
+          });
+        });
+      }
+
+      // 处理历史名人
+      if (cityData.hero && Array.isArray(cityData.hero)) {
+        cityData.hero.forEach((hero: any, index: number) => {
+          allReviews.push({
+            id: `${taskId}-hero-${index}-${Date.now()}`,
+            taskId: taskId,
+            dataType: 'historical_figure',
+            status: 'pending',
+            data: {
+              name: hero.name || `${task.city} - 历史名人 ${index + 1}`,
+              description: hero.desc,
+              story: hero.story,
+              pictureAdvise: hero.pictureAdvise,
+              images: cityData.pictures || []
+            },
+            submittedAt: task.createdAt.toISOString(),
+            reviewedAt: null,
+            reviewerId: null,
+            reviewerName: null,
+            notes: null
+          });
+        });
+      }
+
+      // 处理节庆活动
+      if (cityData.activity && Array.isArray(cityData.activity)) {
+        cityData.activity.forEach((activity: any, index: number) => {
+          allReviews.push({
+            id: `${taskId}-activity-${index}-${Date.now()}`,
+            taskId: taskId,
+            dataType: 'festival_activity',
+            status: 'pending',
+            data: {
+              name: activity.activityName || `${task.city} - 节庆活动 ${index + 1}`,
+              time: activity.activityTime,
+              content: activity.activityContent,
+              pictureAdvise: activity.pictureAdvise,
+              images: cityData.pictures || []
+            },
+            submittedAt: task.createdAt.toISOString(),
+            reviewedAt: null,
+            reviewerId: null,
+            reviewerName: null,
+            notes: null
+          });
+        });
+      }
+    }
+
+    // 分页处理
+    const total = allReviews.length;
+    const paginatedReviews = allReviews.slice(offset, offset + limit);
+
+    res.json({
+      status: 'success',
+      data: {
+        reviews: paginatedReviews,
+        total,
+        page,
+        limit
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('获取采集任务审核数据失败:', error);
+    res.status(500).json({
+      status: 'error',
+      message: '获取采集任务审核数据失败',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * 获取Coze采集的待审核数据列表
+ */
+export const getCozeReviews = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    // 查询Coze采集的待审核数据
+    const reviews = await prisma.cozeReviewData.findMany({
+      skip: offset,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        task: true
+      }
+    });
+
+    const total = await prisma.cozeReviewData.count();
+
+    // 格式化数据
+    const formattedReviews = reviews.map((review: any) => ({
+      id: review.id,
+      taskId: review.taskId,
+      dataType: review.dataType,
+      status: review.status,
+      data: {
+        name: review.data.name || '未知',
+        description: review.data.description || '',
+        content: review.data.content || {},
+        images: review.data.images || []
+      },
+      submittedAt: review.createdAt.toISOString(),
+      reviewedAt: review.reviewedAt?.toISOString(),
+      reviewerId: review.reviewerId,
+      reviewerName: review.reviewerName,
+      notes: review.notes
+    }));
+
+    res.json({
+      status: 'success',
+      data: {
+        reviews: formattedReviews,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error: any) {
+    logger.error('获取Coze审核数据失败:', error);
+    res.status(500).json({
+      status: 'error',
+      message: '获取审核数据失败',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * 审核Coze采集的数据
+ */
+export const reviewCozeData = async (req: Request, res: Response) => {
+  try {
+    const { reviewId } = req.params;
+    const { action, notes, selectedImages } = req.body;
+
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({
+        status: 'error',
+        message: '无效的审核操作'
+      });
+    }
+
+    // 查找待审核的数据
+    const review = await prisma.cozeReviewData.findUnique({
+      where: { id: reviewId }
+    });
+
+    if (!review) {
+      return res.status(404).json({
+        status: 'error',
+        message: '审核数据不存在'
+      });
+    }
+
+    if (review.status !== 'pending') {
+      return res.status(400).json({
+        status: 'error',
+        message: '该数据已经被审核过了'
+      });
+    }
+
+    // 更新审核状态
+    await prisma.cozeReviewData.update({
+      where: { id: reviewId },
+      data: {
+        status: action === 'approve' ? 'approved' : 'rejected',
+        reviewedAt: new Date(),
+        reviewerId: 'admin', // 这里应该从认证信息中获取
+        reviewerName: '管理员',
+        notes: notes || '',
+        selectedImages: action === 'approve' ? selectedImages : undefined
+      }
+    });
+
+    // 如果审核通过，将数据正式入库
+    if (action === 'approve') {
+      const finalData = {
+        ...review.data,
+        images: selectedImages || review.data.images
+      };
+      
+      // 根据数据类型保存到对应的表
+      await saveApprovedCozeData(finalData, review.dataType);
+      logger.info(`Coze数据 ${reviewId} 审核通过，已入库`);
+    }
+
+    logger.info(`审核Coze数据 ${reviewId}，操作: ${action}`);
+
+    res.json({
+      status: 'success',
+      message: `数据已${action === 'approve' ? '通过' : '拒绝'}审核`
+    });
+  } catch (error: any) {
+    logger.error('审核Coze数据失败:', error);
+    res.status(500).json({
+      status: 'error',
+      message: '审核数据失败',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * 保存审核通过的Coze数据到对应的数据表
+ */
+const saveApprovedCozeData = async (data: any, dataType: string) => {
+  try {
+    switch (dataType) {
+      case 'city_overview':
+        // 保存城市概览数据
+        await saveCityOverviewData(data);
+        break;
+      case 'attraction':
+        // 保存景点数据
+        await saveAttractionData(data);
+        break;
+      case 'restaurant':
+        // 保存餐厅数据
+        await saveRestaurantData(data);
+        break;
+      case 'hotel':
+        // 保存酒店数据
+        await saveHotelData(data);
+        break;
+      default:
+        logger.warn(`未知的数据类型: ${dataType}`);
+    }
+  } catch (error) {
+    logger.error('保存审核通过的数据失败:', error);
+    throw error;
+  }
+};
+
+/**
+ * 保存城市概览数据
+ */
+const saveCityOverviewData = async (data: any) => {
+  // 查找或创建城市
+  let city = await prisma.city.findFirst({
+    where: { name: data.name }
+  });
+
+  if (!city) {
+    city = await prisma.city.create({
+      data: {
+        id: uuidv4(),
+        name: data.name,
+        nameEn: data.nameEn || data.name,
+        description: data.description || '',
+        descriptionEn: data.descriptionEn || data.description || '',
+        image: data.images?.[0] || '',
+        location: data.location || ''
+      }
+    });
+  }
+
+  // 解析content数据
+  const content = data.content || {};
+  const history = content.history || {};
+  const culture = content.culture || {};
+  const customs = content.customs || {};
+
+  // 创建或更新城市概览
+  await prisma.cityOverview.upsert({
+    where: { cityId: city.id },
+    update: {
+      historyTitle: history.title || '历史沿革',
+      historyTitleEn: history.titleEn || 'History',
+      historyContent: history.content || '',
+      historyContentEn: history.contentEn || '',
+      historyImage: history.image || '',
+      
+      cultureTitle: culture.title || '文化特色',
+      cultureTitleEn: culture.titleEn || 'Culture',
+      cultureContent: culture.content || '',
+      cultureContentEn: culture.contentEn || '',
+      cultureImage: culture.image || '',
+      
+      customsTitle: customs.title || '风俗习惯',
+      customsTitleEn: customs.titleEn || 'Customs',
+      customsContent: customs.content || '',
+      customsContentEn: customs.contentEn || '',
+      customsImage: customs.image || '',
+      
+      heritageItems: content.heritageItems || [],
+      heritageItemsEn: content.heritageItemsEn || [],
+      festivals: content.festivals || [],
+      festivalsEn: content.festivalsEn || [],
+      historicalStories: content.historicalStories || [],
+      historicalStoriesEn: content.historicalStoriesEn || [],
+      pictures: data.images || []
+    },
+    create: {
+      id: uuidv4(),
+      cityId: city.id,
+      historyTitle: history.title || '历史沿革',
+      historyTitleEn: history.titleEn || 'History',
+      historyContent: history.content || '',
+      historyContentEn: history.contentEn || '',
+      historyImage: history.image || '',
+      
+      cultureTitle: culture.title || '文化特色',
+      cultureTitleEn: culture.titleEn || 'Culture',
+      cultureContent: culture.content || '',
+      cultureContentEn: culture.contentEn || '',
+      cultureImage: culture.image || '',
+      
+      customsTitle: customs.title || '风俗习惯',
+      customsTitleEn: customs.titleEn || 'Customs',
+      customsContent: customs.content || '',
+      customsContentEn: customs.contentEn || '',
+      customsImage: customs.image || '',
+      
+      heritageItems: content.heritageItems || [],
+      heritageItemsEn: content.heritageItemsEn || [],
+      festivals: content.festivals || [],
+      festivalsEn: content.festivalsEn || [],
+      historicalStories: content.historicalStories || [],
+      historicalStoriesEn: content.historicalStoriesEn || [],
+      pictures: data.images || []
+    }
+  });
+};
+
+/**
+   * 根据地址查找或创建城市ID
+   */
+  const findOrCreateCityId = async (address: string): Promise<string> => {
+    // 尝试根据地址中的城市信息查找城市
+    const location = address || '';
+    let city = null;
+    
+    if (location.includes('厦门')) {
+      city = await prisma.city.findFirst({ where: { name: '厦门' } });
+    } else if (location.includes('福州')) {
+      city = await prisma.city.findFirst({ where: { name: '福州' } });
+    } else if (location.includes('泉州')) {
+      city = await prisma.city.findFirst({ where: { name: '泉州' } });
+    }
+    
+    // 如果找不到匹配的城市，使用第一个可用城市
+    if (!city) {
+      city = await prisma.city.findFirst();
+      if (!city) {
+        // 如果数据库中没有任何城市，创建一个默认城市
+        city = await prisma.city.create({
+          data: {
+            id: uuidv4(),
+            name: '默认城市',
+            nameEn: 'Default City',
+            description: '默认城市描述',
+            descriptionEn: 'Default city description',
+            image: '',
+            location: ''
+          }
+        });
+      }
+    }
+    return city.id;
+  };
+
+  /**
+   * 保存景点数据
+   */
+  const saveAttractionData = async (data: any) => {
+    // 如果没有提供cityId，尝试根据地址查找或创建默认城市
+    let cityId = data.cityId;
+    if (!cityId) {
+      cityId = await findOrCreateCityId(data.address || '');
+    }
+
+  await prisma.attraction.create({
+    data: {
+      id: uuidv4(),
+      name: data.name,
+      nameEn: data.nameEn || data.name,
+      description: data.description || '',
+      descriptionEn: data.descriptionEn || data.description || '',
+      image: data.images?.[0] || '',
+      location: data.address || '',
+      price: data.ticketPrice ? parseFloat(data.ticketPrice.replace(/[^\d.]/g, '')) || 0 : 0,
+      openTime: data.openTime || '',
+      cityId: cityId
+    }
+  });
+};
+
+/**
+ * 保存餐厅数据
+ */
+const saveRestaurantData = async (data: any) => {
+    // 如果没有提供cityId，尝试根据地址查找或创建默认城市
+    let cityId = data.cityId;
+    if (!cityId) {
+      cityId = await findOrCreateCityId(data.address || '');
+    }
+
+  await prisma.restaurant.create({
+    data: {
+      id: uuidv4(),
+      name: data.name,
+      nameEn: data.nameEn || data.name,
+      description: data.description || '',
+      descriptionEn: data.descriptionEn || data.description || '',
+      image: data.images?.[0] || '',
+      location: data.address || '',
+      priceRange: data.priceRange || '',
+      cuisine: data.cuisine || '其他',
+      cityId: cityId
+    }
+  });
+};
+
+/**
+ * 保存酒店数据
+ */
+const saveHotelData = async (data: any) => {
+    // 如果没有提供cityId，尝试根据地址查找或创建默认城市
+    let cityId = data.cityId;
+    if (!cityId) {
+      cityId = await findOrCreateCityId(data.address || '');
+    }
+
+  await prisma.hotel.create({
+    data: {
+      id: uuidv4(),
+      name: data.name,
+      nameEn: data.nameEn || data.name,
+      description: data.description || '',
+      descriptionEn: data.descriptionEn || data.description || '',
+      image: data.images?.[0] || '',
+      location: data.address || '',
+      priceRange: data.priceRange || '',
+      stars: data.starRating || 0,
+      cityId: cityId
+    }
+  });
+};
+
+/**
  * 启动数据采集任务
  */
 export const startDataCollection = async (req: Request, res: Response) => {

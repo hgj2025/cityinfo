@@ -43,9 +43,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ collapsed, onToggle }) => {
     },
     {
       key: 'review-queue',
-      label: '审核队列',
+      label: '数据审核',
       icon: '✅',
-      path: '/admin/review'
+      path: '/admin/reviews'
     }
   ];
 

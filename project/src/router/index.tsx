@@ -24,7 +24,7 @@ import TaskDetails from '../pages/p-admin/components/TaskDetails';
 import CityManagement from '../pages/p-admin/components/CityManagement';
 import AttractionManagement from '../pages/p-admin/components/AttractionManagement';
 import FoodManagement from '../pages/p-admin/components/FoodManagement';
-import ReviewQueue from '../pages/p-admin/components/ReviewQueue';
+import UnifiedReview from '../pages/p-admin/components/UnifiedReview';
 
 // 使用 createBrowserRouter 创建路由实例
 const router = createBrowserRouter([
@@ -184,7 +184,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'reviews',
-        element: <ReviewQueue />,
+        element: <UnifiedReview />,
       },
     ],
   },
@@ -227,7 +227,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'reviews',
-        element: <ReviewQueue />,
+        element: <UnifiedReview />,
       },
     ],
   },

@@ -6,7 +6,10 @@ import {
   getTaskStatus,
   getTaskDetails,
   getPendingReviews,
-  reviewData
+  reviewData,
+  getCozeReviews,
+  reviewCozeData,
+  getCollectionTaskReviews
 } from '../controllers/admin.controller';
 
 const router = Router();
@@ -23,5 +26,12 @@ router.get('/data-collection/tasks/:taskId/details', getTaskDetails);
 // 数据审核相关
 router.get('/reviews', getPendingReviews);
 router.post('/reviews/:reviewId', reviewData);
+
+// Coze数据审核相关
+router.get('/coze-reviews', getCozeReviews);
+router.put('/coze-reviews/:reviewId', reviewCozeData);
+
+// 采集任务审核数据
+router.get('/collection-tasks/:taskId/reviews', getCollectionTaskReviews);
 
 export default router;
