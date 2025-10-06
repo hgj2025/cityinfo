@@ -186,52 +186,76 @@ function parseData(content: any): { data: any[], parseError?: string, rawContent
         }
       }
       
-      // 先尝试匹配JSON数组
-      const jsonMatch = cleanContent.match(/\[.*\]/s);
-      if (jsonMatch) {
-        logger.info('找到JSON数组格式，解析中...');
-        try {
-          const parsed = JSON.parse(jsonMatch[0]);
-          logger.info('成功解析JSON数组，数据条数:', parsed.length);
-          return { data: parsed };
-        } catch (parseError: any) {
-          logger.warn('JSON数组解析失败，尝试修复格式:', parseError);
-          
-          // 尝试修复常见的JSON格式问题
-          let fixedJson = jsonMatch[0]
-            .replace(/\\/g, '') // 移除转义字符
-            .replace(/"\s*,\s*"/g, '","') // 修复引号间距
-            .replace(/,\s*]/g, ']') // 移除尾随逗号
-            .replace(/,\s*}/g, '}'); // 移除对象尾随逗号
-          
-          try {
-            const parsed = JSON.parse(fixedJson);
-            logger.info('修复后成功解析JSON数组，数据条数:', parsed.length);
-            return { data: parsed };
-          } catch (fixError: any) {
-            logger.warn('修复后仍无法解析JSON:', fixError);
-            return {
-              data: [],
-              parseError: `JSON解析失败: ${parseError.message}，修复后仍失败: ${fixError.message}`,
-              rawContent: content
-            };
-          }
-        }
-      }
-      
       // 尝试直接解析整个字符串
       logger.info('尝试直接解析整个字符串');
       try {
         const parsed = JSON.parse(cleanContent);
         logger.info('成功解析字符串，结果类型:', typeof parsed);
         
+        // 检查是否是新的Coze工作流格式 (包含city和content字段)
+        if (parsed && typeof parsed === 'object' && parsed.city && parsed.content) {
+          logger.info('检测到新的Coze工作流格式，城市:', parsed.city);
+          
+          // 构建统一的数据结构
+          const result = {
+            city: parsed.city,
+            ...parsed.content,
+            pictureAdvises: parsed.pictureAdvises || [],
+            pictures: parsed.pictures || []
+          };
+          
+          logger.info('成功解析新格式数据，包含字段:', Object.keys(result));
+          return { data: [result] };
+        }
+        
+        // 检查是否是旧格式的数组
         if (Array.isArray(parsed)) {
           return { data: parsed };
         } else if (parsed && parsed.data && Array.isArray(parsed.data)) {
           return { data: parsed.data };
         }
+        
+        // 如果是单个对象，包装成数组
+        if (parsed && typeof parsed === 'object') {
+          return { data: [parsed] };
+        }
+        
       } catch (directParseError: any) {
         logger.warn('直接解析字符串失败:', directParseError);
+        
+        // 尝试匹配JSON数组格式（兼容旧格式）
+        const jsonMatch = cleanContent.match(/\[.*\]/s);
+        if (jsonMatch) {
+          logger.info('找到JSON数组格式，解析中...');
+          try {
+            const parsed = JSON.parse(jsonMatch[0]);
+            logger.info('成功解析JSON数组，数据条数:', parsed.length);
+            return { data: parsed };
+          } catch (parseError: any) {
+            logger.warn('JSON数组解析失败，尝试修复格式:', parseError);
+            
+            // 尝试修复常见的JSON格式问题
+            let fixedJson = jsonMatch[0]
+              .replace(/\\/g, '') // 移除转义字符
+              .replace(/"\s*,\s*"/g, '","') // 修复引号间距
+              .replace(/,\s*]/g, ']') // 移除尾随逗号
+              .replace(/,\s*}/g, '}'); // 移除对象尾随逗号
+            
+            try {
+              const parsed = JSON.parse(fixedJson);
+              logger.info('修复后成功解析JSON数组，数据条数:', parsed.length);
+              return { data: parsed };
+            } catch (fixError: any) {
+              logger.warn('修复后仍无法解析JSON:', fixError);
+              return {
+                data: [],
+                parseError: `JSON解析失败: ${parseError.message}，修复后仍失败: ${fixError.message}`,
+                rawContent: content
+              };
+            }
+          }
+        }
+        
         return {
           data: [],
           parseError: `字符串解析失败: ${directParseError.message}`,
@@ -244,6 +268,22 @@ function parseData(content: any): { data: any[], parseError?: string, rawContent
     if (content && content.data && Array.isArray(content.data)) {
       logger.info('内容是对象且有data数组属性');
       return { data: content.data };
+    }
+
+    // 如果是对象，检查是否是新的Coze工作流格式
+    if (content && typeof content === 'object' && content.city && content.content) {
+      logger.info('检测到对象格式的新Coze工作流数据，城市:', content.city);
+      
+      // 构建统一的数据结构
+      const result = {
+        city: content.city,
+        ...content.content,
+        pictureAdvises: content.pictureAdvises || [],
+        pictures: content.pictures || []
+      };
+      
+      logger.info('成功解析对象格式数据，包含字段:', Object.keys(result));
+      return { data: [result] };
     }
 
     // 如果不是预期格式，返回空数组
