@@ -68,10 +68,14 @@ const RecommendedCities = () => {
           >
             <div className="h-40 overflow-hidden">
               <img
-                src={city.image}
+                src={city.image || '/placeholder-city.jpg'}
                 alt={city.name}
                 data-category="城市"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'https://via.placeholder.com/400x300/e5e7eb/6b7280?text=' + encodeURIComponent(city.name);
+                }}
               />
             </div>
             <div className="p-4">
