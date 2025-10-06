@@ -847,19 +847,19 @@ const performDataCollection = async (taskId: string, request: CollectionRequest)
         }
       });
 
-      // 保存采集到的数据
-      const saveDataStart = new Date();
-      await saveCollectedData(result.data, request.cityName);
-      const saveDataEnd = new Date();
+      // 保存采集到的数据 - 注释掉直接入库的逻辑
+      // const saveDataStart = new Date();
+      // await saveCollectedData(result.data, request.cityName);
+      // const saveDataEnd = new Date();
 
-      executionSteps.push({
-        step: 'data_saved',
-        timestamp: saveDataEnd,
-        description: `数据保存完成，耗时${saveDataEnd.getTime() - saveDataStart.getTime()}ms`,
-        data: { savedCount: result.data.length }
-      });
+      // executionSteps.push({
+      //   step: 'data_saved',
+      //   timestamp: saveDataEnd,
+      //   description: `数据保存完成，耗时${saveDataEnd.getTime() - saveDataStart.getTime()}ms`,
+      //   data: { savedCount: result.data.length }
+      // });
 
-      // 创建审核记录
+      // 创建审核记录 - 数据只有审核通过后才会入库
       const reviewStart = new Date();
       for (const item of result.data) {
         await prisma.dataReview.create({
@@ -876,7 +876,7 @@ const performDataCollection = async (taskId: string, request: CollectionRequest)
       executionSteps.push({
         step: 'review_records_created',
         timestamp: reviewEnd,
-        description: `审核记录创建完成，耗时${reviewEnd.getTime() - reviewStart.getTime()}ms`,
+        description: `审核记录创建完成，耗时${reviewEnd.getTime() - reviewStart.getTime()}ms，数据将在审核通过后入库`,
         data: { reviewCount: result.data.length }
       });
 
@@ -888,7 +888,8 @@ const performDataCollection = async (taskId: string, request: CollectionRequest)
         description: '任务执行完成',
         data: { 
           totalDuration: endTime.getTime() - startTime.getTime(),
-          finalDataCount: result.data.length
+          finalDataCount: result.data.length,
+          pendingReviewCount: result.data.length
         }
       });
 
@@ -1067,7 +1068,17 @@ export const getPendingReviews = async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 10, dataType, status = 'pending' } = req.query;
     
-    const whereClause: any = { status };
+    const whereClause: any = {};
+    
+    // 处理状态筛选
+    if (status === 'pending') {
+      whereClause.status = 'pending';
+    } else if (status === 'approved,rejected') {
+      whereClause.status = { in: ['approved', 'rejected'] };
+    } else {
+      whereClause.status = status;
+    }
+    
     if (dataType) {
       whereClause.dataType = dataType;
     }
@@ -1079,9 +1090,18 @@ export const getPendingReviews = async (req: Request, res: Response) => {
       skip: (Number(page) - 1) * Number(limit)
     });
 
+    const total = await prisma.dataReview.count({
+      where: whereClause
+    });
+
     res.json({
       status: 'success',
-      data: reviews
+      data: {
+        reviews,
+        total,
+        page: Number(page),
+        limit: Number(limit)
+      }
     });
   } catch (error: any) {
     logger.error('获取待审核数据失败:', error);
@@ -1133,9 +1153,21 @@ export const reviewData = async (req: Request, res: Response) => {
     // 如果审核通过，将数据正式入库
     if (action === 'approve') {
       const finalData = editedData || review.data;
+      
+      // 从关联的采集任务中获取城市名称
+      let cityName = 'Unknown City';
+      if (review.taskId) {
+        const task = await prisma.collectionTask.findUnique({
+          where: { id: review.taskId }
+        });
+        if (task) {
+          cityName = task.city;
+        }
+      }
+      
       // 将审核通过的数据保存到对应的数据表
-       await saveCollectedData([finalData], 'Unknown City');
-      logger.info(`数据 ${reviewId} 审核通过，已入库`);
+      await saveCollectedData([finalData], cityName);
+      logger.info(`数据 ${reviewId} 审核通过，已入库到城市: ${cityName}`);
     }
 
     logger.info(`审核数据 ${reviewId}，操作: ${action}`);

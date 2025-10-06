@@ -18,7 +18,7 @@ interface ReviewData {
 const UnifiedReview: React.FC = () => {
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'pending' | 'reviewed' | 'collection'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'reviewed'>('pending');
   const [selectedItem, setSelectedItem] = useState<ReviewData | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,7 +26,8 @@ const UnifiedReview: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedImages, setSelectedImages] = useState<{[key: string]: string[]}>({});
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState<string>('');
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [totalReviews, setTotalReviews] = useState(0);
   const pageSize = 10;
 
   const dataTypeLabels = {
@@ -34,8 +35,14 @@ const UnifiedReview: React.FC = () => {
     restaurant: '餐厅',
     hotel: '酒店',
     coze: 'Coze数据',
-    collection: '采集任务'
+    collection: '采集任务',
+    data_review: '数据审核'
   };
+
+  const dataTypeTabs = [
+    { key: 'pending', label: '待审核', icon: '⏳' },
+    { key: 'reviewed', label: '已审核', icon: '✅' }
+  ];
 
   const statusLabels = {
     pending: '待审核',
@@ -44,123 +51,67 @@ const UnifiedReview: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchReviews();
-  }, [currentPage, activeTab]);
-
-  const fetchReviews = async () => {
-    try {
+    const fetchReviews = async () => {
       setLoading(true);
-      
-      if (activeTab === 'collection') {
-        // 如果是采集任务选项卡，需要先选择任务ID
-        if (!selectedTaskId) {
-          setReviews([]);
-          setTotalCount(0);
-          setTotalPages(1);
-          setLoading(false);
-          return;
+      try {
+        let allReviews: ReviewData[] = [];
+
+        if (activeTab === 'pending' || activeTab === 'reviewed') {
+          // 获取DataReview数据
+          const dataReviewResponse = await fetch(`/api/v1/admin/reviews?page=${currentPage}&limit=${pageSize}&status=${activeTab === 'pending' ? 'pending' : 'approved,rejected'}`);
+          if (dataReviewResponse.ok) {
+            const dataReviewData = await dataReviewResponse.json();
+            const dataReviews = (dataReviewData.data?.reviews || []).map((item: any) => ({
+              ...item,
+              dataType: 'data_review'
+            }));
+            allReviews = [...allReviews, ...dataReviews];
+          }
+
+          // 获取CozeReviewData数据
+          const cozeResponse = await fetch(`/api/v1/admin/coze-reviews?page=${currentPage}&limit=${pageSize}&status=${activeTab === 'pending' ? 'pending' : 'approved,rejected'}`);
+          if (cozeResponse.ok) {
+            const cozeData = await cozeResponse.json();
+            const cozeReviews = (cozeData.data?.reviews || []).map((item: any) => ({
+              ...item,
+              dataType: 'coze'
+            }));
+            allReviews = [...allReviews, ...cozeReviews];
+          }
         }
-        
-        // 获取指定任务的采集数据
-        const response = await adminService.getCollectionTaskReviews(selectedTaskId, currentPage, pageSize);
-        const collectionReviews = (response.reviews || []).map(review => ({
-          ...review,
-          dataType: 'collection' as const
-        }));
-        
-        setReviews(collectionReviews);
-        setTotalCount(response.total || 0);
-        setTotalPages(Math.ceil((response.total || 0) / pageSize));
+
+        // 合并、排序和分页
+        const sortedReviews = allReviews.sort((a, b) => 
+          new Date(b.createdAt || b.created_at || b.submittedAt).getTime() - new Date(a.createdAt || a.created_at || a.submittedAt).getTime()
+        );
+
+        setReviews(sortedReviews);
+        setTotalReviews(sortedReviews.length);
+        setTotalCount(sortedReviews.length);
+        setTotalPages(Math.ceil(sortedReviews.length / pageSize));
         
         // 初始化图片选择状态
         const initialSelectedImages: {[key: string]: string[]} = {};
-        collectionReviews.forEach(review => {
-          const itemData = typeof review.data === 'string' ? JSON.parse(review.data) : review.data;
-          initialSelectedImages[review.id] = itemData.images || [];
+        sortedReviews.forEach(review => {
+          if (review.dataType === 'coze' || review.dataType === 'collection') {
+            const itemData = typeof review.data === 'string' ? JSON.parse(review.data) : review.data;
+            initialSelectedImages[review.id] = itemData.images || [];
+          }
         });
         setSelectedImages(initialSelectedImages);
         
+      } catch (error) {
+        console.error('获取审核数据失败:', error);
+        setReviews([]);
+        setTotalCount(0);
+        setTotalPages(1);
+      } finally {
         setLoading(false);
-        return;
       }
-      
-      // 根据activeTab确定状态筛选
-      const statusFilter = activeTab === 'pending' ? 'pending' : '';
-      
-      // 同时获取传统审核数据和Coze数据
-      const [traditionalResponse, cozeResponse] = await Promise.all([
-        // 获取传统审核数据
-        (async () => {
-          const params = new URLSearchParams({
-            page: '1',
-            limit: '1000' // 获取更多数据用于合并
-          });
-          
-          if (statusFilter) params.append('status', statusFilter);
-          if (activeTab === 'reviewed') {
-            // 获取已审核的数据（已通过和已拒绝）
-            params.delete('status');
-            params.append('status', 'approved,rejected');
-          }
-          
-          const response = await fetch(`http://localhost:3001/api/v1/admin/reviews?${params}`);
-          const result = await response.json();
-          return result.status === 'success' ? result.data.reviews || [] : [];
-        })(),
-        
-        // 获取Coze数据
-        (async () => {
-          const response = await adminService.getCozeReviews(1, 1000);
-          let cozeReviews = (response.reviews || []).map(review => ({
-            ...review,
-            dataType: 'coze' as const
-          }));
-          
-          // 根据tab筛选数据
-          if (activeTab === 'pending') {
-            cozeReviews = cozeReviews.filter(review => review.status === 'pending');
-          } else {
-            cozeReviews = cozeReviews.filter(review => review.status !== 'pending');
-          }
-          
-          return cozeReviews;
-        })()
-      ]);
-      
-      // 合并所有数据
-      const allReviews = [...traditionalResponse, ...cozeResponse];
-      
-      // 按提交时间排序（最新的在前）
-      allReviews.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-      
-      // 分页处理
-      const startIndex = (currentPage - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedReviews = allReviews.slice(startIndex, endIndex);
-      
-      setReviews(paginatedReviews);
-      setTotalCount(allReviews.length);
-      setTotalPages(Math.ceil(allReviews.length / pageSize));
-      
-      // 初始化Coze数据的图片选择状态
-      const initialSelectedImages: {[key: string]: string[]} = {};
-      paginatedReviews.forEach(review => {
-        if (review.dataType === 'coze') {
-          const itemData = typeof review.data === 'string' ? JSON.parse(review.data) : review.data;
-          initialSelectedImages[review.id] = itemData.images || [];
-        }
-      });
-      setSelectedImages(initialSelectedImages);
-      
-    } catch (error) {
-      console.error('获取审核列表失败:', error);
-      setReviews([]);
-      setTotalCount(0);
-      setTotalPages(1);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchReviews();
+  }, [currentPage, pageSize, activeTab]);
 
   const handleSelectItem = (item: ReviewData) => {
     setSelectedItem(item);
@@ -229,21 +180,152 @@ const UnifiedReview: React.FC = () => {
     }
   };
 
-  const handleQuickApprove = async (review: ReviewData) => {
-    if (!confirm('确定要快速通过这条数据吗？')) return;
-    
-    setSelectedItem(review);
-    setReviewNotes('快速审核通过');
-    await handleReview('approve');
+  const handleQuickReview = async (reviewId: string, action: 'approve' | 'reject', dataType: string) => {
+    try {
+      let endpoint = '';
+      if (dataType === 'coze') {
+        endpoint = `/api/v1/admin/coze-reviews/${reviewId}/review`;
+      } else if (dataType === 'data_review') {
+        endpoint = `/api/v1/admin/reviews/${reviewId}`;
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action })
+      });
+
+      if (response.ok) {
+        // 重新获取数据
+        const fetchReviews = async () => {
+          setLoading(true);
+          try {
+            let allReviews: ReviewData[] = [];
+
+            if (activeTab === 'pending' || activeTab === 'reviewed') {
+              // 获取DataReview数据
+              const dataReviewResponse = await fetch(`/api/v1/admin/reviews?page=${currentPage}&limit=${pageSize}&status=${activeTab === 'pending' ? 'pending' : 'approved,rejected'}`);
+              if (dataReviewResponse.ok) {
+                const dataReviewData = await dataReviewResponse.json();
+                const dataReviews = (dataReviewData.data?.reviews || []).map((item: any) => ({
+                  ...item,
+                  dataType: 'data_review'
+                }));
+                allReviews = [...allReviews, ...dataReviews];
+              }
+
+              // 获取CozeReviewData数据
+              const cozeResponse = await fetch(`/api/v1/admin/coze-reviews?page=${currentPage}&limit=${pageSize}&status=${activeTab === 'pending' ? 'pending' : 'approved,rejected'}`);
+              if (cozeResponse.ok) {
+                const cozeData = await cozeResponse.json();
+                const cozeReviews = (cozeData.data?.reviews || []).map((item: any) => ({
+                  ...item,
+                  dataType: 'coze'
+                }));
+                allReviews = [...allReviews, ...cozeReviews];
+              }
+            }
+
+            const sortedReviews = allReviews.sort((a, b) => 
+              new Date(b.createdAt || b.created_at || b.submittedAt).getTime() - new Date(a.createdAt || a.created_at || a.submittedAt).getTime()
+            );
+
+            setReviews(sortedReviews);
+            setTotalReviews(sortedReviews.length);
+            setTotalCount(sortedReviews.length);
+            setTotalPages(Math.ceil(sortedReviews.length / pageSize));
+          } catch (error) {
+            console.error('获取审核数据失败:', error);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        await fetchReviews();
+      }
+    } catch (error) {
+      console.error('审核操作失败:', error);
+    }
   };
 
-  const handleQuickReject = async (review: ReviewData) => {
-    const reason = prompt('请输入拒绝原因：');
-    if (reason === null || !reason.trim()) return;
-    
-    setSelectedItem(review);
-    setReviewNotes(reason);
-    await handleReview('reject');
+  const handleBatchReview = async (action: 'approve' | 'reject') => {
+    if (selectedItems.length === 0) return;
+
+    try {
+      const promises = selectedItems.map(async (reviewId) => {
+        const review = reviews.find(r => r.id === reviewId);
+        if (!review) return;
+
+        let endpoint = '';
+        if (review.dataType === 'coze') {
+          endpoint = `/api/v1/admin/coze-reviews/${reviewId}/review`;
+        } else if (review.dataType === 'data_review') {
+          endpoint = `/api/v1/admin/reviews/${reviewId}`;
+        }
+
+        return fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ action })
+        });
+      });
+
+      await Promise.all(promises);
+      
+      // 重新获取数据
+      const fetchReviews = async () => {
+        setLoading(true);
+        try {
+          let allReviews: ReviewData[] = [];
+
+          if (activeTab === 'pending' || activeTab === 'reviewed') {
+            // 获取DataReview数据
+            const dataReviewResponse = await fetch(`/api/v1/admin/reviews?page=${currentPage}&limit=${pageSize}&status=${activeTab === 'pending' ? 'pending' : 'approved,rejected'}`);
+            if (dataReviewResponse.ok) {
+              const dataReviewData = await dataReviewResponse.json();
+              const dataReviews = (dataReviewData.data?.reviews || []).map((item: any) => ({
+                ...item,
+                dataType: 'data_review'
+              }));
+              allReviews = [...allReviews, ...dataReviews];
+            }
+
+            // 获取CozeReviewData数据
+            const cozeResponse = await fetch(`/api/v1/admin/coze-reviews?page=${currentPage}&limit=${pageSize}&status=${activeTab === 'pending' ? 'pending' : 'approved,rejected'}`);
+            if (cozeResponse.ok) {
+              const cozeData = await cozeResponse.json();
+              const cozeReviews = (cozeData.data?.reviews || []).map((item: any) => ({
+                ...item,
+                dataType: 'coze'
+              }));
+              allReviews = [...allReviews, ...cozeReviews];
+            }
+          }
+
+          const sortedReviews = allReviews.sort((a, b) => 
+            new Date(b.createdAt || b.created_at || b.submittedAt).getTime() - new Date(a.createdAt || a.created_at || a.submittedAt).getTime()
+          );
+
+          setReviews(sortedReviews);
+          setTotalReviews(sortedReviews.length);
+          setTotalCount(sortedReviews.length);
+          setTotalPages(Math.ceil(sortedReviews.length / pageSize));
+        } catch (error) {
+          console.error('获取审核数据失败:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      await fetchReviews();
+      setSelectedItems([]);
+    } catch (error) {
+      console.error('批量审核失败:', error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -403,59 +485,44 @@ const UnifiedReview: React.FC = () => {
           <div className={styles.stats}>
             共 {totalCount} 条数据，第 {currentPage} 页，共 {totalPages} 页
           </div>
-          <button onClick={fetchReviews} className={styles.refreshButton}>
+          <button onClick={() => window.location.reload()} className={styles.refreshButton}>
             刷新
           </button>
         </div>
       </div>
 
       <div className={styles.tabsContainer}>
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'pending' ? styles.active : ''}`}
-            onClick={() => {
-              setActiveTab('pending');
-              setCurrentPage(1);
-            }}
-          >
-            审核中
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'reviewed' ? styles.active : ''}`}
-            onClick={() => {
-              setActiveTab('reviewed');
-              setCurrentPage(1);
-            }}
-          >
-            审核后
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'collection' ? styles.active : ''}`}
-            onClick={() => {
-              setActiveTab('collection');
-              setCurrentPage(1);
-            }}
-          >
-            采集任务
-          </button>
+        <div className={styles.tabContainer}>
+          {dataTypeTabs.map(tab => (
+            <button
+              key={tab.key}
+              className={`${styles.tab} ${activeTab === tab.key ? styles.activeTab : ''}`}
+              onClick={() => {
+                setActiveTab(tab.key as 'pending' | 'reviewed');
+                setCurrentPage(1);
+              }}
+            >
+              <span className={styles.tabIcon}>{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
         </div>
         
-        {activeTab === 'collection' && (
-          <div className={styles.taskSelector}>
-            <label>选择采集任务ID:</label>
-            <input
-              type="text"
-              value={selectedTaskId}
-              onChange={(e) => setSelectedTaskId(e.target.value)}
-              placeholder="请输入任务ID，如：b1522f20-cd0f-420a-a534-e1fb31328b2c"
-              className={styles.taskInput}
-            />
+        {activeTab === 'pending' && (
+          <div className={styles.batchActions}>
             <button 
-              onClick={fetchReviews}
-              className={styles.loadButton}
-              disabled={!selectedTaskId.trim()}
+              className={styles.batchApproveBtn}
+              onClick={() => handleBatchReview('approve')}
+              disabled={selectedItems.length === 0}
             >
-              加载数据
+              批量通过 ({selectedItems.length})
+            </button>
+            <button 
+              className={styles.batchRejectBtn}
+              onClick={() => handleBatchReview('reject')}
+              disabled={selectedItems.length === 0}
+            >
+              批量拒绝 ({selectedItems.length})
             </button>
           </div>
         )}
@@ -482,8 +549,8 @@ const UnifiedReview: React.FC = () => {
                     </span>
                   </div>
                   <div className={styles.reviewDate}>
-                    {formatDate(item.submittedAt)}
-                  </div>
+                  {formatDate(item.submittedAt || item.createdAt || item.created_at)}
+                </div>
                 </div>
 
                 <div className={styles.reviewContent}>
@@ -511,10 +578,25 @@ const UnifiedReview: React.FC = () => {
 
                 {item.status === 'pending' && (
                   <div className={styles.quickActions}>
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(item.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        if (e.target.checked) {
+                          setSelectedItems(prev => [...prev, item.id]);
+                        } else {
+                          setSelectedItems(prev => prev.filter(id => id !== item.id));
+                        }
+                      }}
+                      className={styles.checkbox}
+                    />
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleQuickApprove(item);
+                        if (confirm('确定要快速通过这条数据吗？')) {
+                          handleQuickReview(item.id, 'approve', item.dataType);
+                        }
                       }}
                       className={styles.approveButton}
                     >
@@ -523,7 +605,10 @@ const UnifiedReview: React.FC = () => {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleQuickReject(item);
+                        const reason = prompt('请输入拒绝原因：');
+                        if (reason && reason.trim()) {
+                          handleQuickReview(item.id, 'reject', item.dataType);
+                        }
                       }}
                       className={styles.rejectButton}
                     >
