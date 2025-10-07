@@ -22,6 +22,7 @@ import AdminDashboard from '../pages/p-admin/components/AdminDashboard';
 import DataCollection from '../pages/p-admin/components/DataCollection';
 import TaskDetails from '../pages/p-admin/components/TaskDetails';
 import OptimizedReviewQueue from '../components/OptimizedReviewQueue';
+import VisualReviewInterface from '../pages/p-admin/components/VisualReviewInterface';
 
 // 使用 createBrowserRouter 创建路由实例
 const router = createBrowserRouter([
@@ -167,11 +168,11 @@ const router = createBrowserRouter([
         path: 'data-collection',
         element: <DataCollection />,
       },
-
       {
         path: 'reviews',
-        element: <OptimizedReviewQueue />,
+        element: <VisualReviewInterface />,
       },
+
     ],
   },
   {
@@ -198,10 +199,6 @@ const router = createBrowserRouter([
       {
         path: 'tasks/:taskId/details',
         element: <TaskDetails />,
-      },
-      {
-        path: 'reviews',
-        element: <OptimizedReviewQueue />,
       },
     ],
   },

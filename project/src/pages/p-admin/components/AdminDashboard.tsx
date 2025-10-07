@@ -115,9 +115,6 @@ const AdminDashboard: React.FC = () => {
           <button className={styles.actionBtn} onClick={() => window.location.href = '/admin/review'}>
             ✅ 查看待审核
           </button>
-          <button className={styles.actionBtn} onClick={() => window.location.href = '/admin/cities'}>
-            🏙️ 管理城市
-          </button>
         </div>
       </div>
     </div>

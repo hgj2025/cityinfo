@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './DataReview.module.css';
+import api from '../../../services/api';
 
 interface DataReview {
   id: string;
@@ -32,11 +33,8 @@ const DataReview: React.FC = () => {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/review/pending');
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data.data || []);
-      }
+      const data = await api.get('/admin/reviews?status=pending');
+      setReviews(data.data?.reviews || []);
     } catch (error) {
       console.error('获取待审核数据失败:', error);
     } finally {
@@ -46,11 +44,8 @@ const DataReview: React.FC = () => {
 
   const fetchTasks = async () => {
     try {
-      const response = await fetch('/api/admin/collection/tasks');
-      if (response.ok) {
-        const data = await response.json();
-        setTasks(data.data || []);
-      }
+      const data = await api.get('/admin/data-collection/tasks');
+      setTasks(data.data?.tasks || []);
     } catch (error) {
       console.error('获取任务列表失败:', error);
     }
@@ -64,26 +59,15 @@ const DataReview: React.FC = () => {
 
   const handleApprove = async (reviewId: string, editedData?: any) => {
     try {
-      const response = await fetch('/api/admin/review/approve', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          reviewId,
-          editedData
-        })
+      await api.post(`/admin/reviews/${reviewId}`, {
+        action: 'approve',
+        editedData
       });
 
-      if (response.ok) {
-        fetchReviews();
-        setShowModal(false);
-        setSelectedReview(null);
-        setEditedData(null);
-      } else {
-        const error = await response.json();
-        alert(error.message || '审核失败');
-      }
+      fetchReviews();
+      setShowModal(false);
+      setSelectedReview(null);
+      setEditedData(null);
     } catch (error) {
       console.error('审核失败:', error);
       alert('审核失败');
@@ -92,17 +76,12 @@ const DataReview: React.FC = () => {
 
   const handleReject = async (reviewId: string) => {
     try {
-      const response = await fetch('/api/admin/review/reject', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ reviewId })
+      await api.post(`/admin/reviews/${reviewId}`, {
+        action: 'reject'
       });
 
-      if (response.ok) {
-        fetchReviews();
-        setShowModal(false);
+      fetchReviews();
+      setShowModal(false);
         setSelectedReview(null);
         setEditedData(null);
       } else {

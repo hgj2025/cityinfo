@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ReviewQueue.module.css';
+import api from '../../../services/api';
 
 interface ReviewData {
   id: string;
@@ -54,8 +55,7 @@ const ReviewQueue: React.FC = () => {
       if (selectedType) params.append('dataType', selectedType);
       if (selectedStatus) params.append('status', selectedStatus);
       
-      const response = await fetch(`/api/v1/admin/reviews?${params}`);
-      const result = await response.json();
+      const result = await api.get(`/admin/reviews?${params}`);
       
       if (result.status === 'success') {
         setReviews(result.data.reviews);

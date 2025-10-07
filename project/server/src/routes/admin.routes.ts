@@ -8,8 +8,6 @@ import {
   deleteCollectionTask,
   getPendingReviews,
   reviewData,
-  getCozeReviews,
-  reviewCozeData,
   getCollectionTaskReviews
 } from '../controllers/admin.controller';
 
@@ -29,9 +27,7 @@ router.delete('/data-collection/tasks/:taskId', deleteCollectionTask);
 router.get('/reviews', getPendingReviews);
 router.post('/reviews/:reviewId', reviewData);
 
-// Coze数据审核相关
-router.get('/coze-reviews', getCozeReviews);
-router.put('/coze-reviews/:reviewId', reviewCozeData);
+
 
 // 采集任务审核数据
 router.get('/collection-tasks/:taskId/reviews', getCollectionTaskReviews);

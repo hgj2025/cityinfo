@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './OptimizedReviewQueue.module.css';
+import api from '../../../services/api';
 
 interface ReviewData {
   id: string;
@@ -12,7 +13,7 @@ interface ReviewData {
   reviewerName?: string;
   notes?: string;
   taskId?: string;
-  source: 'dataReview' | 'cozeReview' | 'collectionTask';
+  source: 'dataReview' | 'collectionTask';
 }
 
 interface TabConfig {
@@ -82,10 +83,9 @@ const OptimizedReviewQueue: React.FC = () => {
         status: statusFilter
       });
       
-      // 并行获取所有数据源
-      const [dataReviewRes, cozeReviewRes, collectionTaskRes] = await Promise.all([
-        fetch(`/api/v1/admin/reviews?${params}`).then(res => res.json()),
-        fetch(`/api/v1/admin/coze-reviews?${params}`).then(res => res.json()),
+      // 获取数据审核数据源
+      const [dataReviewRes, collectionTaskRes] = await Promise.all([
+        api.get(`/admin/reviews?${params}`),
         fetchCollectionTaskReviews(params)
       ]);
 
@@ -99,16 +99,6 @@ const OptimizedReviewQueue: React.FC = () => {
             ...review,
             source: 'dataReview',
             submittedAt: review.createdAt || review.submittedAt
-          });
-        });
-      }
-
-      // 处理 CozeReviewData 数据
-      if (cozeReviewRes.status === 'success' && cozeReviewRes.data.reviews) {
-        cozeReviewRes.data.reviews.forEach((review: any) => {
-          allReviews.push({
-            ...review,
-            source: 'cozeReview'
           });
         });
       }
@@ -145,8 +135,7 @@ const OptimizedReviewQueue: React.FC = () => {
   const fetchCollectionTaskReviews = async (params: URLSearchParams) => {
     try {
       // 获取已完成的采集任务
-      const tasksRes = await fetch('/api/v1/admin/data-collection/tasks');
-      const tasksData = await tasksRes.json();
+      const tasksData = await api.get('/admin/data-collection/tasks');
       
       if (tasksData.status !== 'success') return [];
       
@@ -201,32 +190,19 @@ const OptimizedReviewQueue: React.FC = () => {
       let method = 'PUT';
       
       // 根据数据源选择不同的API
+      let result;
       switch (review.source) {
         case 'dataReview':
-          apiUrl = `/api/v1/admin/reviews/${reviewId}`;
-          method = 'POST';
-          break;
-        case 'cozeReview':
-          apiUrl = `/api/v1/admin/coze-reviews/${reviewId}`;
+          result = await api.post(`/admin/reviews/${reviewId}`, {
+            action,
+            notes
+          });
           break;
         case 'collectionTask':
           // 对于采集任务数据，需要特殊处理
           alert('采集任务数据审核功能正在开发中');
           return;
       }
-
-      const response = await fetch(apiUrl, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action,
-          notes
-        }),
-      });
-
-      const result = await response.json();
       
       if (result.status === 'success') {
         setShowDetailModal(false);
@@ -368,10 +344,9 @@ const OptimizedReviewQueue: React.FC = () => {
                 <span className={`${styles.status} ${styles[review.status]}`}>
                   {statusLabels[review.status]}
                 </span>
-                <span className={styles.source}>
-                  来源: {review.source === 'dataReview' ? '数据审核' : 
-                         review.source === 'cozeReview' ? 'Coze采集' : '采集任务'}
-                </span>
+                <span className={styles.sourceTag}>
+                      {review.source === 'dataReview' ? '数据审核' : '采集任务'}
+                    </span>
               </div>
               <div className={styles.reviewDate}>
                 提交时间: {formatDate(review.submittedAt)}
@@ -455,9 +430,8 @@ const OptimizedReviewQueue: React.FC = () => {
               <div className={styles.detailSection}>
                 <h3>审核信息</h3>
                 <p><strong>数据来源:</strong> {
-                  selectedReview.source === 'dataReview' ? '数据审核' : 
-                  selectedReview.source === 'cozeReview' ? 'Coze采集' : '采集任务'
-                }</p>
+                selectedReview.source === 'dataReview' ? '数据审核' : '采集任务'
+              }</p>
                 <p><strong>提交时间:</strong> {formatDate(selectedReview.submittedAt)}</p>
                 <p><strong>当前状态:</strong> 
                   <span className={`${styles.status} ${styles[selectedReview.status]}`}>

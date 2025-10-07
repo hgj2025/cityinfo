@@ -1,30 +1,6 @@
 import api from './api';
 
-export interface CozeReviewData {
-  id: string;
-  taskId: string;
-  dataType: string;
-  status: 'pending' | 'approved' | 'rejected';
-  data: {
-    name: string;
-    description: string;
-    content: any;
-    images: string[];
-  };
-  submittedAt: string;
-  reviewedAt?: string;
-  reviewerId?: string;
-  reviewerName?: string;
-  notes?: string;
-}
 
-export interface CozeReviewsResponse {
-  reviews: CozeReviewData[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
 
 export interface ReviewRequest {
   action: 'approve' | 'reject';
@@ -33,21 +9,7 @@ export interface ReviewRequest {
 }
 
 class AdminService {
-  /**
-   * 获取Coze审核数据列表
-   */
-  async getCozeReviews(page: number = 1, limit: number = 10): Promise<CozeReviewsResponse> {
-    const response = await api.get(`/admin/coze-reviews?page=${page}&limit=${limit}`);
-    return response.data;
-  }
 
-  /**
-   * 审核Coze数据
-   */
-  async reviewCozeData(reviewId: string, request: ReviewRequest): Promise<{ message: string }> {
-    const response = await api.put(`/admin/coze-reviews/${reviewId}`, request);
-    return response.data;
-  }
 
   /**
    * 获取仪表板统计数据
@@ -108,7 +70,7 @@ class AdminService {
   /**
    * 获取采集任务的审核数据
    */
-  async getCollectionTaskReviews(taskId: string, page: number = 1, limit: number = 10): Promise<CozeReviewsResponse> {
+  async getCollectionTaskReviews(taskId: string, page: number = 1, limit: number = 10): Promise<any> {
     const response = await api.get(`/admin/collection-tasks/${taskId}/reviews?page=${page}&limit=${limit}`);
     return response.data;
   }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './TaskDetails.module.css';
+import api from '../../../services/api';
 
 interface TaskDetails {
   id: string;
@@ -54,11 +55,7 @@ const TaskDetails: React.FC = () => {
   const fetchTaskDetails = async (id: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/v1/admin/data-collection/tasks/${id}/details`);
-      if (!response.ok) {
-        throw new Error('获取任务详情失败');
-      }
-      const data = await response.json();
+      const data = await api.get(`/admin/data-collection/tasks/${id}/details`);
       setTaskDetails(data.data);
     } catch (err: any) {
       setError(err.message);

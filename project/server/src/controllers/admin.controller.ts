@@ -6,8 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient() as any;
 
-// 移除内存存储，使用数据库模型
-
 /**
  * 获取管理后台统计数据
  */
@@ -278,378 +276,6 @@ export const getCollectionTaskReviews = async (req: Request, res: Response) => {
 };
 
 /**
- * 获取Coze采集的待审核数据列表
- */
-export const getCozeReviews = async (req: Request, res: Response) => {
-  try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const offset = (page - 1) * limit;
-
-    // 查询Coze采集的待审核数据
-    const reviews = await prisma.cozeReviewData.findMany({
-      skip: offset,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        task: true
-      }
-    });
-
-    const total = await prisma.cozeReviewData.count();
-
-    // 格式化数据
-    const formattedReviews = reviews.map((review: any) => ({
-      id: review.id,
-      taskId: review.taskId,
-      dataType: review.dataType,
-      status: review.status,
-      data: {
-        name: review.data.name || '未知',
-        description: review.data.description || '',
-        content: review.data.content || {},
-        images: review.data.images || []
-      },
-      submittedAt: review.createdAt.toISOString(),
-      reviewedAt: review.reviewedAt?.toISOString(),
-      reviewerId: review.reviewerId,
-      reviewerName: review.reviewerName,
-      notes: review.notes
-    }));
-
-    res.json({
-      status: 'success',
-      data: {
-        reviews: formattedReviews,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error: any) {
-    logger.error('获取Coze审核数据失败:', error);
-    res.status(500).json({
-      status: 'error',
-      message: '获取审核数据失败',
-      error: error.message
-    });
-  }
-};
-
-/**
- * 审核Coze采集的数据
- */
-export const reviewCozeData = async (req: Request, res: Response) => {
-  try {
-    const { reviewId } = req.params;
-    const { action, notes, selectedImages } = req.body;
-
-    if (!['approve', 'reject'].includes(action)) {
-      return res.status(400).json({
-        status: 'error',
-        message: '无效的审核操作'
-      });
-    }
-
-    // 查找待审核的数据
-    const review = await prisma.cozeReviewData.findUnique({
-      where: { id: reviewId }
-    });
-
-    if (!review) {
-      return res.status(404).json({
-        status: 'error',
-        message: '审核数据不存在'
-      });
-    }
-
-    if (review.status !== 'pending') {
-      return res.status(400).json({
-        status: 'error',
-        message: '该数据已经被审核过了'
-      });
-    }
-
-    // 更新审核状态
-    await prisma.cozeReviewData.update({
-      where: { id: reviewId },
-      data: {
-        status: action === 'approve' ? 'approved' : 'rejected',
-        reviewedAt: new Date(),
-        reviewerId: 'admin', // 这里应该从认证信息中获取
-        reviewerName: '管理员',
-        notes: notes || '',
-        selectedImages: action === 'approve' ? selectedImages : undefined
-      }
-    });
-
-    // 如果审核通过，将数据正式入库
-    if (action === 'approve') {
-      const finalData = {
-        ...review.data,
-        images: selectedImages || review.data.images
-      };
-      
-      // 根据数据类型保存到对应的表
-      await saveApprovedCozeData(finalData, review.dataType);
-      logger.info(`Coze数据 ${reviewId} 审核通过，已入库`);
-    }
-
-    logger.info(`审核Coze数据 ${reviewId}，操作: ${action}`);
-
-    res.json({
-      status: 'success',
-      message: `数据已${action === 'approve' ? '通过' : '拒绝'}审核`
-    });
-  } catch (error: any) {
-    logger.error('审核Coze数据失败:', error);
-    res.status(500).json({
-      status: 'error',
-      message: '审核数据失败',
-      error: error.message
-    });
-  }
-};
-
-/**
- * 保存审核通过的Coze数据到对应的数据表
- */
-const saveApprovedCozeData = async (data: any, dataType: string) => {
-  try {
-    switch (dataType) {
-      case 'city_overview':
-        // 保存城市概览数据
-        await saveCityOverviewData(data);
-        break;
-      case 'attraction':
-        // 保存景点数据
-        await saveAttractionData(data);
-        break;
-      case 'restaurant':
-        // 保存餐厅数据
-        await saveRestaurantData(data);
-        break;
-      case 'hotel':
-        // 保存酒店数据
-        await saveHotelData(data);
-        break;
-      default:
-        logger.warn(`未知的数据类型: ${dataType}`);
-    }
-  } catch (error) {
-    logger.error('保存审核通过的数据失败:', error);
-    throw error;
-  }
-};
-
-/**
- * 保存城市概览数据
- */
-const saveCityOverviewData = async (data: any) => {
-  // 查找或创建城市
-  let city = await prisma.city.findFirst({
-    where: { name: data.name }
-  });
-
-  if (!city) {
-    city = await prisma.city.create({
-      data: {
-        id: uuidv4(),
-        name: data.name,
-        nameEn: data.nameEn || data.name,
-        description: data.description || '',
-        descriptionEn: data.descriptionEn || data.description || '',
-        image: data.images?.[0] || '',
-        location: data.location || ''
-      }
-    });
-  }
-
-  // 解析content数据
-  const content = data.content || {};
-  const history = content.history || {};
-  const culture = content.culture || {};
-  const customs = content.customs || {};
-
-  // 创建或更新城市概览
-  await prisma.cityOverview.upsert({
-    where: { cityId: city.id },
-    update: {
-      historyTitle: history.title || '历史沿革',
-      historyTitleEn: history.titleEn || 'History',
-      historyContent: history.content || '',
-      historyContentEn: history.contentEn || '',
-      historyImage: history.image || '',
-      
-      cultureTitle: culture.title || '文化特色',
-      cultureTitleEn: culture.titleEn || 'Culture',
-      cultureContent: culture.content || '',
-      cultureContentEn: culture.contentEn || '',
-      cultureImage: culture.image || '',
-      
-      customsTitle: customs.title || '风俗习惯',
-      customsTitleEn: customs.titleEn || 'Customs',
-      customsContent: customs.content || '',
-      customsContentEn: customs.contentEn || '',
-      customsImage: customs.image || '',
-      
-      heritageItems: content.heritageItems || [],
-      heritageItemsEn: content.heritageItemsEn || [],
-      festivals: content.festivals || [],
-      festivalsEn: content.festivalsEn || [],
-      historicalStories: content.historicalStories || [],
-      historicalStoriesEn: content.historicalStoriesEn || [],
-      pictures: data.images || []
-    },
-    create: {
-      id: uuidv4(),
-      cityId: city.id,
-      historyTitle: history.title || '历史沿革',
-      historyTitleEn: history.titleEn || 'History',
-      historyContent: history.content || '',
-      historyContentEn: history.contentEn || '',
-      historyImage: history.image || '',
-      
-      cultureTitle: culture.title || '文化特色',
-      cultureTitleEn: culture.titleEn || 'Culture',
-      cultureContent: culture.content || '',
-      cultureContentEn: culture.contentEn || '',
-      cultureImage: culture.image || '',
-      
-      customsTitle: customs.title || '风俗习惯',
-      customsTitleEn: customs.titleEn || 'Customs',
-      customsContent: customs.content || '',
-      customsContentEn: customs.contentEn || '',
-      customsImage: customs.image || '',
-      
-      heritageItems: content.heritageItems || [],
-      heritageItemsEn: content.heritageItemsEn || [],
-      festivals: content.festivals || [],
-      festivalsEn: content.festivalsEn || [],
-      historicalStories: content.historicalStories || [],
-      historicalStoriesEn: content.historicalStoriesEn || [],
-      pictures: data.images || []
-    }
-  });
-};
-
-/**
-   * 根据地址查找或创建城市ID
-   */
-  const findOrCreateCityId = async (address: string): Promise<string> => {
-    // 尝试根据地址中的城市信息查找城市
-    const location = address || '';
-    let city = null;
-    
-    if (location.includes('厦门')) {
-      city = await prisma.city.findFirst({ where: { name: '厦门' } });
-    } else if (location.includes('福州')) {
-      city = await prisma.city.findFirst({ where: { name: '福州' } });
-    } else if (location.includes('泉州')) {
-      city = await prisma.city.findFirst({ where: { name: '泉州' } });
-    }
-    
-    // 如果找不到匹配的城市，使用第一个可用城市
-    if (!city) {
-      city = await prisma.city.findFirst();
-      if (!city) {
-        // 如果数据库中没有任何城市，创建一个默认城市
-        city = await prisma.city.create({
-          data: {
-            id: uuidv4(),
-            name: '默认城市',
-            nameEn: 'Default City',
-            description: '默认城市描述',
-            descriptionEn: 'Default city description',
-            image: '',
-            location: ''
-          }
-        });
-      }
-    }
-    return city.id;
-  };
-
-  /**
-   * 保存景点数据
-   */
-  const saveAttractionData = async (data: any) => {
-    // 如果没有提供cityId，尝试根据地址查找或创建默认城市
-    let cityId = data.cityId;
-    if (!cityId) {
-      cityId = await findOrCreateCityId(data.address || '');
-    }
-
-  await prisma.attraction.create({
-    data: {
-      id: uuidv4(),
-      name: data.name,
-      nameEn: data.nameEn || data.name,
-      description: data.description || '',
-      descriptionEn: data.descriptionEn || data.description || '',
-      image: data.images?.[0] || '',
-      location: data.address || '',
-      price: data.ticketPrice ? parseFloat(data.ticketPrice.replace(/[^\d.]/g, '')) || 0 : 0,
-      openTime: data.openTime || '',
-      cityId: cityId
-    }
-  });
-};
-
-/**
- * 保存餐厅数据
- */
-const saveRestaurantData = async (data: any) => {
-    // 如果没有提供cityId，尝试根据地址查找或创建默认城市
-    let cityId = data.cityId;
-    if (!cityId) {
-      cityId = await findOrCreateCityId(data.address || '');
-    }
-
-  await prisma.restaurant.create({
-    data: {
-      id: uuidv4(),
-      name: data.name,
-      nameEn: data.nameEn || data.name,
-      description: data.description || '',
-      descriptionEn: data.descriptionEn || data.description || '',
-      image: data.images?.[0] || '',
-      location: data.address || '',
-      priceRange: data.priceRange || '',
-      cuisine: data.cuisine || '其他',
-      cityId: cityId
-    }
-  });
-};
-
-/**
- * 保存酒店数据
- */
-const saveHotelData = async (data: any) => {
-    // 如果没有提供cityId，尝试根据地址查找或创建默认城市
-    let cityId = data.cityId;
-    if (!cityId) {
-      cityId = await findOrCreateCityId(data.address || '');
-    }
-
-  await prisma.hotel.create({
-    data: {
-      id: uuidv4(),
-      name: data.name,
-      nameEn: data.nameEn || data.name,
-      description: data.description || '',
-      descriptionEn: data.descriptionEn || data.description || '',
-      image: data.images?.[0] || '',
-      location: data.address || '',
-      priceRange: data.priceRange || '',
-      stars: data.starRating || 0,
-      cityId: cityId
-    }
-  });
-};
-
-/**
  * 启动数据采集任务
  */
 export const startDataCollection = async (req: Request, res: Response) => {
@@ -663,10 +289,36 @@ export const startDataCollection = async (req: Request, res: Response) => {
       });
     }
 
+    // 验证城市名称格式和编码
+    const trimmedCityName = cityName.trim();
+    if (!trimmedCityName) {
+      return res.status(400).json({
+        status: 'error',
+        message: '城市名称不能为空'
+      });
+    }
+
+    // 检查是否包含乱码字符（只检查明显的乱码模式）
+    const garbledPattern = /^\?+$|[\uFFFD\u0000-\u001F\u007F-\u009F]/;
+    if (garbledPattern.test(trimmedCityName)) {
+      return res.status(400).json({
+        status: 'error',
+        message: '城市名称包含无效字符，请检查输入'
+      });
+    }
+
+    // 检查长度
+    if (trimmedCityName.length > 50) {
+      return res.status(400).json({
+        status: 'error',
+        message: '城市名称过长，请输入50个字符以内的名称'
+      });
+    }
+
     // 创建采集任务记录
     const task = await prisma.collectionTask.create({
       data: {
-        city: cityName,
+        city: trimmedCityName,
         dataType: 'general',
         status: 'running',
         progress: 0
@@ -674,9 +326,9 @@ export const startDataCollection = async (req: Request, res: Response) => {
     });
 
     // 异步执行数据采集
-    performDataCollection(task.id, { cityName });
+    performDataCollection(task.id, { cityName: trimmedCityName });
 
-    logger.info(`启动数据采集任务: ${task.id}, 城市: ${cityName}`);
+    logger.info(`启动数据采集任务: ${task.id}, 城市: ${trimmedCityName}`);
 
     res.json({
       status: 'success',
@@ -892,18 +544,6 @@ const performDataCollection = async (taskId: string, request: CollectionRequest)
         }
       });
 
-      // 保存采集到的数据 - 注释掉直接入库的逻辑
-      // const saveDataStart = new Date();
-      // await saveCollectedData(result.data, request.cityName);
-      // const saveDataEnd = new Date();
-
-      // executionSteps.push({
-      //   step: 'data_saved',
-      //   timestamp: saveDataEnd,
-      //   description: `数据保存完成，耗时${saveDataEnd.getTime() - saveDataStart.getTime()}ms`,
-      //   data: { savedCount: result.data.length }
-      // });
-
       // 创建审核记录 - 数据只有审核通过后才会入库
       const reviewStart = new Date();
       for (const item of result.data) {
@@ -998,120 +638,11 @@ const performDataCollection = async (taskId: string, request: CollectionRequest)
 };
 
 /**
- * 调用Coze API采集数据
- */
-
-
-/**
- * 保存采集到的数据
- */
-const saveCollectedData = async (data: any[], cityName: string) => {
-  try {
-    logger.info(`开始保存 ${cityName} 的数据，共 ${data.length} 条`);
-
-    // 首先确保城市存在
-    let city = await prisma.city.findFirst({ where: { name: cityName } });
-    if (!city) {
-      city = await prisma.city.create({
-        data: {
-          name: cityName,
-          nameEn: cityName,
-          description: `${cityName}城市信息`,
-          descriptionEn: `${cityName} city information`,
-          image: '',
-          location: '未知'
-        }
-      });
-    }
-
-    // 保存为通用数据项
-    for (const item of data) {
-      // 根据数据内容判断类型并保存到相应表
-      if (item.category && (item.category.includes('景点') || item.category.includes('景区') || item.ticketPrice)) {
-        // 景点数据
-        await prisma.attraction.create({
-          data: {
-            name: item.name || '未知景点',
-            nameEn: item.nameEn || item.name || 'Unknown Attraction',
-            description: item.description || '暂无描述',
-            descriptionEn: item.descriptionEn || item.description || 'No description available',
-            image: item.images?.[0] || item.imageUrl || '',
-            location: item.address || item.location || '未知位置',
-            price: item.ticketPrice ? parseFloat(item.ticketPrice.replace(/[^\d.]/g, '')) || null : null,
-            openTime: item.openingHours || '',
-            cityId: city.id
-          }
-        });
-      } else if (item.cuisine || item.specialties || (item.category && item.category.includes('餐'))) {
-        // 餐厅数据
-        await prisma.restaurant.create({
-          data: {
-            name: item.name || '未知餐厅',
-            nameEn: item.nameEn || item.name || 'Unknown Restaurant',
-            description: item.description || '暂无描述',
-            descriptionEn: item.descriptionEn || item.description || 'No description available',
-            cuisine: item.cuisine || '其他',
-            cityId: city.id,
-            coordinates: item.coordinates ? JSON.stringify(item.coordinates) : null,
-            openingHours: item.openingHours || '',
-            priceRange: item.priceRange || '',
-            rating: item.rating || 0,
-            imageUrl: item.images?.[0] || '',
-            specialties: item.specialties ? JSON.stringify(item.specialties) : null,
-            isActive: true
-          }
-        });
-      } else if (item.starRating || item.amenities || (item.category && item.category.includes('酒店'))) {
-        // 酒店数据
-        await prisma.hotel.create({
-          data: {
-            name: item.name || '未知酒店',
-            nameEn: item.nameEn || item.name || 'Unknown Hotel',
-            description: item.description || '暂无描述',
-            descriptionEn: item.descriptionEn || item.description || 'No description available',
-            category: item.category || '其他',
-            address: item.address || '',
-            cityId: city.id,
-            coordinates: item.coordinates ? JSON.stringify(item.coordinates) : null,
-            starRating: item.starRating || 0,
-            priceRange: item.priceRange || '',
-            amenities: item.amenities ? JSON.stringify(item.amenities) : null,
-            imageUrl: item.images?.[0] || '',
-            roomTypes: item.roomTypes ? JSON.stringify(item.roomTypes) : null,
-            isActive: true
-          }
-        });
-      } else {
-        // 默认保存为景点
-        await prisma.attraction.create({
-          data: {
-            name: item.name || '未知项目',
-            nameEn: item.nameEn || item.name || 'Unknown Item',
-            description: item.description || '暂无描述',
-            descriptionEn: item.descriptionEn || item.description || 'No description available',
-            image: item.images?.[0] || item.imageUrl || '',
-            location: item.address || item.location || '未知位置',
-            price: null,
-            openTime: item.openingHours || '',
-            cityId: city.id
-          }
-        });
-      }
-    }
-
-    logger.info(`成功保存 ${cityName} 的数据`);
-  } catch (error: any) {
-    logger.error('保存采集数据失败:', error);
-    throw error;
-  }
-};
-
-/**
  * 获取待审核数据列表
  */
 export const getPendingReviews = async (req: Request, res: Response) => {
   try {
-    const { page = 1, limit = 10, dataType, status = 'pending' } = req.query;
+    const { page = 1, limit = 10, dataType, status = 'pending', taskId } = req.query;
     
     const whereClause: any = {};
     
@@ -1126,6 +657,11 @@ export const getPendingReviews = async (req: Request, res: Response) => {
     
     if (dataType) {
       whereClause.dataType = dataType;
+    }
+    
+    // 添加taskId过滤
+    if (taskId) {
+      whereClause.taskId = taskId;
     }
 
     const reviews = await prisma.dataReview.findMany({
@@ -1228,5 +764,146 @@ export const reviewData = async (req: Request, res: Response) => {
       message: '审核数据失败',
       error: error.message
     });
+  }
+};
+
+/**
+ * 根据地址查找或创建城市ID
+ */
+const findOrCreateCityId = async (address: string): Promise<string> => {
+  // 尝试根据地址中的城市信息查找城市
+  const location = address || '';
+  let city = null;
+  
+  if (location.includes('厦门')) {
+    city = await prisma.city.findFirst({ where: { name: '厦门' } });
+  } else if (location.includes('福州')) {
+    city = await prisma.city.findFirst({ where: { name: '福州' } });
+  } else if (location.includes('泉州')) {
+    city = await prisma.city.findFirst({ where: { name: '泉州' } });
+  }
+  
+  // 如果找不到匹配的城市，使用第一个可用城市
+  if (!city) {
+    city = await prisma.city.findFirst();
+    if (!city) {
+      // 如果数据库中没有任何城市，创建一个默认城市
+      city = await prisma.city.create({
+        data: {
+          id: uuidv4(),
+          name: '默认城市',
+          nameEn: 'Default City',
+          description: '默认城市描述',
+          descriptionEn: 'Default city description',
+          image: '',
+          location: ''
+        }
+      });
+    }
+  }
+  return city.id;
+};
+
+/**
+ * 保存采集到的数据
+ */
+const saveCollectedData = async (data: any[], cityName: string) => {
+  try {
+    logger.info(`开始保存 ${cityName} 的数据，共 ${data.length} 条`);
+
+    // 首先确保城市存在
+    let city = await prisma.city.findFirst({ where: { name: cityName } });
+    if (!city) {
+      city = await prisma.city.create({
+        data: {
+          name: cityName,
+          nameEn: cityName,
+          description: `${cityName}城市信息`,
+          descriptionEn: `${cityName} city information`,
+          image: '',
+          location: '未知'
+        }
+      });
+    }
+
+    // 保存为通用数据项
+    for (const item of data) {
+      // 根据数据内容判断类型并保存到相应表
+      if (item.category && (item.category.includes('景点') || item.category.includes('景区') || item.ticketPrice)) {
+        // 景点数据
+        await prisma.attraction.create({
+          data: {
+            name: item.name || '未知景点',
+            nameEn: item.nameEn || item.name || 'Unknown Attraction',
+            description: item.description || '暂无描述',
+            descriptionEn: item.descriptionEn || item.description || 'No description available',
+            image: item.images?.[0] || item.imageUrl || '',
+            location: item.address || item.location || '未知位置',
+            price: item.ticketPrice ? parseFloat(item.ticketPrice.replace(/[^\d.]/g, '')) || null : null,
+            openTime: item.openingHours || '',
+            cityId: city.id
+          }
+        });
+      } else if (item.cuisine || item.specialties || (item.category && item.category.includes('餐'))) {
+        // 餐厅数据
+        await prisma.restaurant.create({
+          data: {
+            name: item.name || '未知餐厅',
+            nameEn: item.nameEn || item.name || 'Unknown Restaurant',
+            description: item.description || '暂无描述',
+            descriptionEn: item.descriptionEn || item.description || 'No description available',
+            cuisine: item.cuisine || '其他',
+            cityId: city.id,
+            coordinates: item.coordinates ? JSON.stringify(item.coordinates) : null,
+            openingHours: item.openingHours || '',
+            priceRange: item.priceRange || '',
+            rating: item.rating || 0,
+            imageUrl: item.images?.[0] || '',
+            specialties: item.specialties ? JSON.stringify(item.specialties) : null,
+            isActive: true
+          }
+        });
+      } else if (item.starRating || item.amenities || (item.category && item.category.includes('酒店'))) {
+        // 酒店数据
+        await prisma.hotel.create({
+          data: {
+            name: item.name || '未知酒店',
+            nameEn: item.nameEn || item.name || 'Unknown Hotel',
+            description: item.description || '暂无描述',
+            descriptionEn: item.descriptionEn || item.description || 'No description available',
+            category: item.category || '其他',
+            address: item.address || '',
+            cityId: city.id,
+            coordinates: item.coordinates ? JSON.stringify(item.coordinates) : null,
+            starRating: item.starRating || 0,
+            priceRange: item.priceRange || '',
+            amenities: item.amenities ? JSON.stringify(item.amenities) : null,
+            imageUrl: item.images?.[0] || '',
+            roomTypes: item.roomTypes ? JSON.stringify(item.roomTypes) : null,
+            isActive: true
+          }
+        });
+      } else {
+        // 默认保存为景点
+        await prisma.attraction.create({
+          data: {
+            name: item.name || '未知项目',
+            nameEn: item.nameEn || item.name || 'Unknown Item',
+            description: item.description || '暂无描述',
+            descriptionEn: item.descriptionEn || item.description || 'No description available',
+            image: item.images?.[0] || item.imageUrl || '',
+            location: item.address || item.location || '未知位置',
+            price: null,
+            openTime: item.openingHours || '',
+            cityId: city.id
+          }
+        });
+      }
+    }
+
+    logger.info(`成功保存 ${cityName} 的数据`);
+  } catch (error: any) {
+    logger.error('保存采集数据失败:', error);
+    throw error;
   }
 };

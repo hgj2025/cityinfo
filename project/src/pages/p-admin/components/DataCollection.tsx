@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DataCollection.module.css';
+import api from '../../../services/api';
 
 interface CollectionTask {
   id: string;
@@ -35,25 +36,22 @@ const DataCollection: React.FC = () => {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/admin/data-collection/tasks');
-      if (response.ok) {
-        const data = await response.json();
-        const taskList = data.data || [];
-        setTasks(taskList);
+      const data = await api.get('/admin/data-collection/tasks');
+      const taskList = data.data?.tasks || [];
+      setTasks(taskList);
         
-        // 计算统计数据
-        const totalTasks = taskList.length;
-        const runningTasks = taskList.filter((task: CollectionTask) => task.status === 'running').length;
-        const completedTasks = taskList.filter((task: CollectionTask) => task.status === 'completed').length;
-        const failedTasks = taskList.filter((task: CollectionTask) => task.status === 'failed').length;
-        
-        setStats({
-          totalTasks,
-          runningTasks,
-          completedTasks,
-          failedTasks
-        });
-      }
+      // 计算统计数据
+      const totalTasks = taskList.length;
+      const runningTasks = taskList.filter((task: CollectionTask) => task.status === 'running').length;
+      const completedTasks = taskList.filter((task: CollectionTask) => task.status === 'completed').length;
+      const failedTasks = taskList.filter((task: CollectionTask) => task.status === 'failed').length;
+      
+      setStats({
+        totalTasks,
+        runningTasks,
+        completedTasks,
+        failedTasks
+      });
     } catch (error) {
       console.error('获取任务列表失败:', error);
     } finally {
@@ -75,13 +73,10 @@ const DataCollection: React.FC = () => {
     try {
       // 为每个选中的数据类型创建单独的任务
       const promises = newTask.dataTypes.map(dataType => 
-        fetch('/api/v1/admin/data-collection/start', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ cityName: newTask.city, dataType })
-        })
+        api.post('/admin/data-collection/start', { 
+          cityName: newTask.city, 
+          dataType 
+        }).then(() => ({ ok: true })).catch(() => ({ ok: false }))
       );
 
       const responses = await Promise.all(promises);
@@ -111,15 +106,8 @@ const DataCollection: React.FC = () => {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const response = await fetch(`/api/v1/admin/data-collection/tasks/${taskId}`, {
-        method: 'DELETE'
-      });
-      
-      if (response.ok) {
-        setTasks(prev => prev.filter(task => task.id !== taskId));
-      } else {
-        alert('删除任务失败');
-      }
+      await api.delete(`/admin/data-collection/tasks/${taskId}`);
+      setTasks(prev => prev.filter(task => task.id !== taskId));
     } catch (error) {
       console.error('删除任务失败:', error);
       alert('删除任务失败');
@@ -128,15 +116,8 @@ const DataCollection: React.FC = () => {
 
   const handleRetryTask = async (taskId: string) => {
     try {
-      const response = await fetch(`/api/v1/admin/data-collection/tasks/${taskId}/retry`, {
-        method: 'POST'
-      });
-      
-      if (response.ok) {
-        fetchTasks();
-      } else {
-        alert('重试任务失败');
-      }
+      await api.post(`/admin/data-collection/tasks/${taskId}/retry`);
+      fetchTasks();
     } catch (error) {
       console.error('重试任务失败:', error);
       alert('重试任务失败');

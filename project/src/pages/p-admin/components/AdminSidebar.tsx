@@ -24,24 +24,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ collapsed, onToggle }) => {
       path: '/admin/data-collection'
     },
     {
-      key: 'city-management',
-      label: '城市管理',
-      icon: '🏙️',
-      path: '/admin/cities'
-    },
-    {
-      key: 'attraction-management',
-      label: '景点管理',
-      icon: '🎯',
-      path: '/admin/attractions'
-    },
-    {
-      key: 'food-management',
-      label: '美食管理',
-      icon: '🍜',
-      path: '/admin/foods'
-    },
-    {
       key: 'review-queue',
       label: '数据审核',
       icon: '✅',

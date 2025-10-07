@@ -6,6 +6,53 @@ const COZE_API_TOKEN = process.env.COZE_API_TOKEN || 'pat_JNcSzYcU8vqpY2hy58DUZu
 const COZE_API_BASE_URL = process.env.COZE_API_BASE_URL || 'https://api.coze.cn';
 const WORKFLOW_ID = process.env.COZE_WORKFLOW_ID || '7503369073804328971';
 
+/**
+ * 验证和清理城市名称
+ * @param cityName 原始城市名称
+ * @returns 清理后的城市名称，如果无效则返回null
+ */
+function validateAndCleanCityName(cityName: string): string | null {
+  if (!cityName || typeof cityName !== 'string') {
+    return null;
+  }
+
+  // 去除首尾空格
+  let cleaned = cityName.trim();
+  
+  // 检查是否为空
+  if (!cleaned) {
+    return null;
+  }
+
+  // 检查是否包含乱码字符（如问号、特殊符号等）
+  const garbledPattern = /^\?+$|^[^\u4e00-\u9fff\u0041-\u005a\u0061-\u007a\u00c0-\u017f\u0100-\u017f]+$/;
+  if (garbledPattern.test(cleaned)) {
+    logger.warn(`检测到疑似乱码城市名称: ${cleaned}`);
+    return null;
+  }
+
+  // 检查长度是否合理（1-50个字符）
+  if (cleaned.length < 1 || cleaned.length > 50) {
+    logger.warn(`城市名称长度不合理: ${cleaned} (长度: ${cleaned.length})`);
+    return null;
+  }
+
+  // 确保UTF-8编码正确
+  try {
+    const buffer = Buffer.from(cleaned, 'utf8');
+    const decoded = buffer.toString('utf8');
+    if (decoded !== cleaned) {
+      logger.warn(`城市名称编码异常: 原始=${cleaned}, 解码后=${decoded}`);
+      return null;
+    }
+  } catch (error) {
+    logger.warn(`城市名称编码验证失败: ${cleaned}`, error);
+    return null;
+  }
+
+  return cleaned;
+}
+
 // Coze API客户端
 const cozeClient = new CozeAPI({
   token: COZE_API_TOKEN,
@@ -55,12 +102,18 @@ async function runWorkflowWithRetry(params: WorkflowParams): Promise<WorkflowRes
     try {
       logger.info(`第${attempt}次尝试运行workflow，参数:`, JSON.stringify(params));
       
+      // 验证和清理城市名称
+      const cityName = validateAndCleanCityName(params.city);
+      if (!cityName) {
+        throw new Error(`无效的城市名称: ${params.city}`);
+      }
+      
       const workflowParams = {
-        city: params.city
+        city: cityName
       };
       
       logger.info(`发送给Coze的参数:`, JSON.stringify(workflowParams));
-      logger.info(`城市名称编码检查: ${params.city} (长度: ${params.city.length})`);
+      logger.info(`城市名称编码检查: ${cityName} (长度: ${cityName.length}, 字节长度: ${Buffer.byteLength(cityName, 'utf8')})`);
 
       // 使用流式API运行workflow
       const stream = await cozeClient.workflows.runs.stream({
@@ -159,22 +212,38 @@ async function runWorkflowWithRetry(params: WorkflowParams): Promise<WorkflowRes
 function parseData(content: any): { data: any[], parseError?: string, rawContent?: any } {
   try {
     logger.info('开始解析数据，原始内容类型:', typeof content);
-    const contentStr = content ? content.toString() : 'null/undefined';
+    
+    // 确保内容的字符编码正确
+    let processedContent = content;
+    if (typeof content === 'string') {
+      try {
+        // 验证UTF-8编码
+        const buffer = Buffer.from(content, 'utf8');
+        processedContent = buffer.toString('utf8');
+        logger.info('字符编码验证通过');
+      } catch (error) {
+        logger.warn('字符编码验证失败，尝试修复:', error);
+        // 尝试清理可能的编码问题
+        processedContent = content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+      }
+    }
+    
+    const contentStr = processedContent ? processedContent.toString() : 'null/undefined';
     logger.info('原始内容长度:', contentStr.length);
     logger.info('原始内容前200字符:', contentStr.substring(0, 200));
 
-    // 如果content已经是数组，直接返回
-    if (Array.isArray(content)) {
+    // 如果processedContent已经是数组，直接返回
+    if (Array.isArray(processedContent)) {
       logger.info('内容已是数组格式，直接返回');
-      return { data: content };
+      return { data: processedContent };
     }
 
     // 如果是字符串，尝试解析JSON
-    if (typeof content === 'string') {
+    if (typeof processedContent === 'string') {
       logger.info('内容是字符串，尝试解析JSON');
       
       // 清理字符串，移除可能的转义字符和格式问题
-      let cleanContent = content.trim();
+      let cleanContent = processedContent.trim();
       
       // 如果字符串被双重转义，先解码一次
       if (cleanContent.startsWith('"') && cleanContent.endsWith('"')) {
@@ -265,21 +334,32 @@ function parseData(content: any): { data: any[], parseError?: string, rawContent
     }
 
     // 如果是对象且有data属性
-    if (content && content.data && Array.isArray(content.data)) {
+    if (processedContent && processedContent.data && Array.isArray(processedContent.data)) {
       logger.info('内容是对象且有data数组属性');
-      return { data: content.data };
+      return { data: processedContent.data };
     }
 
     // 如果是对象，检查是否是新的Coze工作流格式
-    if (content && typeof content === 'object' && content.city && content.content) {
-      logger.info('检测到对象格式的新Coze工作流数据，城市:', content.city);
+    if (processedContent && typeof processedContent === 'object' && processedContent.city && processedContent.content) {
+      logger.info('检测到对象格式的新Coze工作流数据，城市:', processedContent.city);
+      
+      // 验证城市名称
+      const validatedCity = validateAndCleanCityName(processedContent.city);
+      if (!validatedCity) {
+        logger.warn('对象格式数据中包含无效城市名称，跳过');
+        return {
+          data: [],
+          parseError: `对象格式数据中包含无效城市名称: ${processedContent.city}`,
+          rawContent: processedContent
+        };
+      }
       
       // 构建统一的数据结构
       const result = {
-        city: content.city,
-        ...content.content,
-        pictureAdvises: content.pictureAdvises || [],
-        pictures: content.pictures || []
+        city: validatedCity,
+        ...processedContent.content,
+        pictureAdvises: processedContent.pictureAdvises || [],
+        pictures: processedContent.pictures || []
       };
       
       logger.info('成功解析对象格式数据，包含字段:', Object.keys(result));
@@ -287,11 +367,11 @@ function parseData(content: any): { data: any[], parseError?: string, rawContent
     }
 
     // 如果不是预期格式，返回空数组
-    logger.warn('数据格式不符合预期，返回空数组。内容结构:', Object.keys(content || {}));
+    logger.warn('数据格式不符合预期，返回空数组。内容结构:', Object.keys(processedContent || {}));
     return {
       data: [],
-      parseError: `数据格式不符合预期，内容类型: ${typeof content}，结构: ${JSON.stringify(Object.keys(content || {})).substring(0, 100)}`,
-      rawContent: content
+      parseError: `数据格式不符合预期，内容类型: ${typeof processedContent}，结构: ${JSON.stringify(Object.keys(processedContent || {})).substring(0, 100)}`,
+      rawContent: processedContent
     };
   } catch (error: any) {
     logger.warn('解析数据失败，返回空数组:', error);

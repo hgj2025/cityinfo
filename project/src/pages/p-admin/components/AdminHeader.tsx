@@ -11,9 +11,6 @@ const AdminHeader: React.FC = () => {
       </div>
       
       <div className={styles.right}>
-        <div className={styles.time}>
-          {currentTime}
-        </div>
         <div className={styles.userInfo}>
           <span className={styles.avatar}>👤</span>
           <span className={styles.username}>管理员</span>

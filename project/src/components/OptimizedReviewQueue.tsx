@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './OptimizedReviewQueue.module.css';
+import api from '../services/api';
 
 // 类型定义
 interface CollectionTask {
@@ -75,17 +76,12 @@ const OptimizedReviewQueue: React.FC = () => {
       setLoading(true);
       
       // 并行获取所有数据源
-      const [reviewsRes, cozeRes, tasksRes] = await Promise.all([
-        fetch('/api/v1/admin/reviews?page=1&limit=100'),
-        fetch('/api/v1/admin/coze-reviews?page=1&limit=100'),
-        fetch('/api/v1/admin/data-collection/tasks')
+      const [reviewsData, cozeData, tasksData] = await Promise.all([
+        api.get('/admin/reviews?page=1&limit=100'),
+        api.get('/admin/coze-reviews?page=1&limit=100'),
+        api.get('/admin/data-collection/tasks')
       ]);
 
-      const [reviewsData, cozeData, tasksData] = await Promise.all([
-        reviewsRes.json(),
-        cozeRes.json(),
-        tasksRes.json()
-      ]);
 
       // 按城市聚合数据
       const cityMap = new Map<string, CityReviewSummary>();
@@ -165,14 +161,9 @@ const OptimizedReviewQueue: React.FC = () => {
     try {
       setDetailLoading(true);
       
-      const [reviewsRes, cozeRes] = await Promise.all([
-        fetch(`/api/v1/admin/reviews?taskId=${taskId}&page=1&limit=100`),
-        fetch(`/api/v1/admin/coze-reviews?taskId=${taskId}&page=1&limit=100`)
-      ]);
-
       const [reviewsData, cozeData] = await Promise.all([
-        reviewsRes.json(),
-        cozeRes.json()
+        api.get(`/admin/reviews?taskId=${taskId}&page=1&limit=100`),
+        api.get(`/admin/coze-reviews?taskId=${taskId}&page=1&limit=100`)
       ]);
 
       setReviewData(reviewsData.data?.reviews || []);
@@ -290,35 +281,25 @@ const OptimizedReviewQueue: React.FC = () => {
   // 审核操作
   const handleReview = async (itemId: string, action: 'approve' | 'reject', dataType: string, notes?: string) => {
     try {
-      let endpoint = '';
-      let method = 'POST';
+      let result;
       
-      // 根据数据类型选择正确的API端点
       if (dataType === 'coze') {
-        endpoint = `/api/v1/admin/coze-reviews/${itemId}`;
-        method = 'PUT';
+        result = await api.put(`/admin/coze-reviews/${itemId}`, {
+          action,
+          notes: notes || '',
+          selectedImages: []
+        });
       } else if (dataType === 'data_review') {
-        endpoint = `/api/v1/admin/reviews/${itemId}`;
-        method = 'POST';
+        result = await api.post(`/admin/reviews/${itemId}`, {
+          action,
+          notes: notes || '',
+          selectedImages: []
+        });
       } else {
         // 对于采集任务数据，暂时提示功能开发中
         alert('采集任务数据审核功能正在开发中');
         return;
       }
-      
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action,
-          notes: notes || '',
-          selectedImages: []
-        }),
-      });
-
-      const result = await response.json();
       
       if (result.status === 'success') {
         // 刷新数据
@@ -343,14 +324,7 @@ const OptimizedReviewQueue: React.FC = () => {
     }
     
     try {
-      const response = await fetch(`/api/v1/admin/data-collection/tasks/${taskId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const result = await response.json();
+      const result = await api.delete(`/admin/data-collection/tasks/${taskId}`);
       
       if (result.status === 'success') {
         // 刷新城市列表
