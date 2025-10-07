@@ -1,7 +1,7 @@
 /* 容器样式 */
 .container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   background-color: #f5f7fa;
 }
@@ -35,6 +35,25 @@
   background: #edf2f7;
   border-radius: 6px;
   font-weight: 500;
+}
+
+/* 左侧边栏 */
+.sidebar {
+  width: 400px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid #e2e8f0;
+}
+
+/* 右侧主要内容区域 */
+.mainContent {
+  flex: 1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* 主要内容区域 */
@@ -200,6 +219,108 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+  display: flex;
+  gap: 24px;
+}
+
+/* 基本信息区域 */
+.basicInfo {
+  flex: 1;
+  min-width: 400px;
+}
+
+/* 图片展示区域 */
+.imageSection {
+  flex: 1;
+  min-width: 600px;
+}
+
+/* 图片两列布局 */
+.imageColumns {
+  display: flex;
+  gap: 24px;
+  height: 100%;
+}
+
+.selectedImagesColumn,
+.allImagesColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.selectedImagesColumn h3,
+.allImagesColumn h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.imageItem {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background: white;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.imageItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.emptyImageGrid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  color: #718096;
+  font-size: 14px;
+}
+
+/* 三列布局 */
+.detailColumn {
+  flex: 1;
+  min-width: 0; /* 防止flex子项溢出 */
+}
+
+.detailColumn.textColumn {
+  flex: 0 0 350px; /* 固定宽度的文本列 */
+}
+
+.detailColumn.selectedImagesColumn {
+  flex: 0 0 300px; /* 固定宽度的选中图片列 */
+}
+
+.detailColumn.allImagesColumn {
+  flex: 1; /* 剩余空间给所有图片列 */
 }
 
 .textSection {
@@ -722,6 +843,135 @@
   padding: 0 4px;
 }
 
+/* 选中图片列样式 */
+.selectedImagesSection {
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 16px;
+  height: fit-content;
+}
+
+.selectedImagesSection h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.selectedImagesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selectedImageItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.selectedImageItem img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.selectedImageInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.selectedImageTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2d3748;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectedImageGroup {
+  font-size: 12px;
+  color: #718096;
+}
+
+/* 所有图片列样式 */
+.allImagesSection {
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.allImagesSection h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.pictureAdviseGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.pictureAdviseItem {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.pictureAdviseItem:hover {
+  border-color: #3182ce;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.15);
+}
+
+.pictureAdviseItem.selected {
+  border-color: #3182ce;
+  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+}
+
+.pictureAdviseImage {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.pictureAdviseTitle {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2d3748;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adviseGroupTitle {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5568;
+  margin: 16px 0 8px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.adviseGroupTitle:first-child {
+  margin-top: 0;
+}
+
 /* 响应式设计 */
 @media (max-width: 1200px) {
   .reviewList {
@@ -730,6 +980,19 @@
   
   .imageGrid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .detailContent {
+    flex-direction: column;
+  }
+  
+  .detailColumn.textColumn,
+  .detailColumn.selectedImagesColumn {
+    flex: none;
+  }
+  
+  .pictureAdviseGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
