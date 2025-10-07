@@ -21,7 +21,7 @@ import AdminLayout from '../pages/p-admin';
 import AdminDashboard from '../pages/p-admin/components/AdminDashboard';
 import DataCollection from '../pages/p-admin/components/DataCollection';
 import TaskDetails from '../pages/p-admin/components/TaskDetails';
-import UnifiedReview from '../pages/p-admin/components/UnifiedReview';
+import OptimizedReviewQueue from '../components/OptimizedReviewQueue';
 
 // 使用 createBrowserRouter 创建路由实例
 const router = createBrowserRouter([
@@ -170,7 +170,7 @@ const router = createBrowserRouter([
 
       {
         path: 'reviews',
-        element: <UnifiedReview />,
+        element: <OptimizedReviewQueue />,
       },
     ],
   },
@@ -201,7 +201,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'reviews',
-        element: <UnifiedReview />,
+        element: <OptimizedReviewQueue />,
       },
     ],
   },

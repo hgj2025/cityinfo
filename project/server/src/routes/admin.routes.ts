@@ -5,6 +5,7 @@ import {
   getCollectionTasks,
   getTaskStatus,
   getTaskDetails,
+  deleteCollectionTask,
   getPendingReviews,
   reviewData,
   getCozeReviews,
@@ -22,6 +23,7 @@ router.post('/data-collection/start', startDataCollection);
 router.get('/data-collection/tasks', getCollectionTasks);
 router.get('/data-collection/tasks/:taskId', getTaskStatus);
 router.get('/data-collection/tasks/:taskId/details', getTaskDetails);
+router.delete('/data-collection/tasks/:taskId', deleteCollectionTask);
 
 // 数据审核相关
 router.get('/reviews', getPendingReviews);

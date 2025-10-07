@@ -54,6 +54,51 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 };
 
 /**
+ * 删除采集任务
+ */
+export const deleteCollectionTask = async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    
+    // 检查任务是否存在
+    const task = await prisma.collectionTask.findUnique({
+      where: { id: taskId }
+    });
+    
+    if (!task) {
+      return res.status(404).json({
+        status: 'error',
+        message: '任务不存在'
+      });
+    }
+    
+    // 删除相关的审核记录
+    await prisma.dataReview.deleteMany({
+      where: { taskId }
+    });
+    
+    // 删除采集任务
+    await prisma.collectionTask.delete({
+      where: { id: taskId }
+    });
+    
+    logger.info(`删除采集任务: ${taskId}`);
+    
+    res.json({
+      status: 'success',
+      message: '任务删除成功'
+    });
+  } catch (error: any) {
+    logger.error('删除采集任务失败:', error);
+    res.status(500).json({
+      status: 'error',
+      message: '删除采集任务失败',
+      error: error.message
+    });
+  }
+};
+
+/**
  * 获取采集任务数据并格式化为审核数据
  */
 export const getCollectionTaskReviews = async (req: Request, res: Response) => {
