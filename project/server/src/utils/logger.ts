@@ -1,4 +1,12 @@
 import winston from 'winston';
+import fs from 'fs';
+import path from 'path';
+
+// 确保日志目录存在
+const logDir = 'logs';
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
 
 const levels = {
   error: 0,
@@ -24,7 +32,8 @@ const colors = {
 
 winston.addColors(colors);
 
-const format = winston.format.combine(
+// 控制台格式（带颜色）
+const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.colorize({ all: true }),
   winston.format.printf(
@@ -32,19 +41,32 @@ const format = winston.format.combine(
   ),
 );
 
+// 文件格式（不带颜色，确保UTF-8编码）
+const fileFormat = winston.format.combine(
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+  winston.format.printf(
+    (info) => `${info.timestamp} ${info.level}: ${info.message}`,
+  ),
+);
+
 const transports = [
-  new winston.transports.Console(),
-  new winston.transports.File({
-    filename: 'logs/error.log',
-    level: 'error',
+  new winston.transports.Console({
+    format: consoleFormat
   }),
-  new winston.transports.File({ filename: 'logs/all.log' }),
+  new winston.transports.File({
+    filename: path.join(logDir, 'error.log'),
+    level: 'error',
+    format: fileFormat
+  }),
+  new winston.transports.File({ 
+    filename: path.join(logDir, 'all.log'),
+    format: fileFormat
+  }),
 ];
 
 export const logger = winston.createLogger({
   level: level(),
   levels,
-  format,
   transports,
 });
 

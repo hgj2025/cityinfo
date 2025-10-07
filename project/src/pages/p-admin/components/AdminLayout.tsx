@@ -28,24 +28,6 @@ const AdminLayout: React.FC = () => {
       icon: '🔄'
     },
     {
-      key: 'cities',
-      label: '城市管理',
-      path: '/admin/cities',
-      icon: '🏙️'
-    },
-    {
-      key: 'attractions',
-      label: '景点管理',
-      path: '/admin/attractions',
-      icon: '🏛️'
-    },
-    {
-      key: 'food',
-      label: '美食管理',
-      path: '/admin/food',
-      icon: '🍽️'
-    },
-    {
       key: 'review',
       label: '审核队列',
       path: '/admin/review',

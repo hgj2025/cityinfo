@@ -24,16 +24,23 @@ const errorLoggerPlugin = () => ({
 });
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => ({
-  plugins: [react(), mode === 'development' ? errorLoggerPlugin() : null,],
-  server: {
-    allowedHosts: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-        secure: false,
+export default defineConfig(({ mode }) => {
+  // 加载环境变量
+  const backendPort = process.env.VITE_BACKEND_PORT || '3001';
+  const frontendPort = process.env.VITE_FRONTEND_PORT || '5174';
+  
+  return {
+    plugins: [react(), mode === 'development' ? errorLoggerPlugin() : null,],
+    server: {
+      port: parseInt(frontendPort),
+      allowedHosts: true,
+      proxy: {
+        '/api': {
+          target: `http://localhost:${backendPort}`,
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
-  },
-}));
+  };
+});

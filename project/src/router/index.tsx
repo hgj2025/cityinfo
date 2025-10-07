@@ -21,9 +21,6 @@ import AdminLayout from '../pages/p-admin';
 import AdminDashboard from '../pages/p-admin/components/AdminDashboard';
 import DataCollection from '../pages/p-admin/components/DataCollection';
 import TaskDetails from '../pages/p-admin/components/TaskDetails';
-import CityManagement from '../pages/p-admin/components/CityManagement';
-import AttractionManagement from '../pages/p-admin/components/AttractionManagement';
-import FoodManagement from '../pages/p-admin/components/FoodManagement';
 import UnifiedReview from '../pages/p-admin/components/UnifiedReview';
 
 // 使用 createBrowserRouter 创建路由实例
@@ -170,18 +167,7 @@ const router = createBrowserRouter([
         path: 'data-collection',
         element: <DataCollection />,
       },
-      {
-        path: 'cities',
-        element: <CityManagement />,
-      },
-      {
-        path: 'attractions',
-        element: <AttractionManagement />,
-      },
-      {
-        path: 'foods',
-        element: <FoodManagement />,
-      },
+
       {
         path: 'reviews',
         element: <UnifiedReview />,
@@ -212,18 +198,6 @@ const router = createBrowserRouter([
       {
         path: 'tasks/:taskId/details',
         element: <TaskDetails />,
-      },
-      {
-        path: 'cities',
-        element: <CityManagement />,
-      },
-      {
-        path: 'attractions',
-        element: <AttractionManagement />,
-      },
-      {
-        path: 'foods',
-        element: <FoodManagement />,
       },
       {
         path: 'reviews',
