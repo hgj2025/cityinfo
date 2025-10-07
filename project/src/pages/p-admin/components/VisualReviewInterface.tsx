@@ -223,11 +223,9 @@ const VisualReviewInterface: React.FC = () => {
   // 提取文本信息
   const extractTextInfo = (data: any) => {
     if (!data || typeof data !== 'object') {
-      console.log('extractTextInfo: 数据为空或不是对象', data);
       return {};
     }
     
-    console.log('extractTextInfo: 开始提取文本信息', data);
     const textInfo: Record<string, any> = {};
     const imageFields = ['images', 'pictures', 'image'];
     
@@ -267,21 +265,22 @@ const VisualReviewInterface: React.FC = () => {
       }
     });
     
-    console.log('extractTextInfo: 提取的文本信息', textInfo);
     return textInfo;
   };
 
   const handleSelectReview = (review: ReviewData) => {
-    console.log('选中审核项目:', review);
-    
     // 验证数据完整性
-    if (!review || !review.data) {
-      console.error('审核数据不完整:', review);
+    if (!review) {
+      console.error('审核项目为空');
       return;
     }
     
-    console.log('选中的审核数据:', review);
-    console.log('数据结构:', review.data);
+    if (!review.data) {
+      console.error('审核数据不完整，data字段为空:', review);
+      // 即使data为空，也要设置selectedReview以显示错误信息
+      setSelectedReview(review);
+      return;
+    }
     
     setSelectedReview(review);
     setSelectedPictures({}); // 重置选择状态
@@ -463,179 +462,179 @@ const VisualReviewInterface: React.FC = () => {
                     <p>该审核项目的数据为空或格式不正确</p>
                   </div>
                 ) : (
-                <div>
-                {/* 文本信息 */}
-                <div className={styles.textSection}>
-                  <h3>基本信息</h3>
-                  <div className={styles.textInfo}>
-                    {Object.entries(extractTextInfo(selectedReview.data)).map(([key, value]) => {
-                      // 跳过内部生成的字段
-                      if (key.endsWith('_count') || key.endsWith('_preview')) return null;
-                      
-                      // 友好的字段名映射
-                      const fieldLabels: Record<string, string> = {
-                        'city': '城市',
-                        'location': '位置',
-                        'name': '名称',
-                        'title': '标题',
-                        'description': '描述',
-                        'pictureAdvises': '图片建议',
-                        'type': '类型',
-                        'category': '分类',
-                        'address': '地址',
-                        'phone': '电话',
-                        'website': '网站',
-                        'rating': '评分',
-                        'price': '价格',
-                        'openTime': '开放时间',
-                        'tags': '标签',
-                        'culture': '文化',
-                        'history': '历史',
-                        'art': '艺术',
-                        'hero': '英雄人物',
-                        'activity': '活动',
-                        'tradition.food': '传统美食',
-                        'tradition.daily': '日常生活',
-                        'tradition.bigday': '重要节日',
-                        'tradition.tradition': '传统习俗'
-                      };
-                      
-                      const label = fieldLabels[key] || key;
-                      
-                      return (
-                        <div key={key} className={styles.textItem}>
-                          <label>{label}:</label>
-                          <span>
-                            {Array.isArray(value) ? (
-                              key === 'pictureAdvises' ? (
-                                <div>
-                                  <div>共 {value.length} 项建议</div>
-                                  <div className={styles.advisesList}>
-                                    {value.map((item: string, index: number) => {
-                                      // 获取对应的图片（每个建议对应3张图片）
-                                      const pictures = selectedReview?.data?.pictures || [];
-                                      const relatedPictures = pictures.slice(index * 3, (index + 1) * 3);
-                                      
-                                      return (
-                                        <div key={index} className={styles.adviseItemWithImages}>
-                                          <div className={styles.adviseText}>
-                                            {index + 1}. {item}
-                                          </div>
-                                          {relatedPictures.length > 0 && (
-                                            <div className={styles.relatedImages}>
-                                              {relatedPictures.map((picture: any, picIndex: number) => {
-                                                const isSelected = (selectedPictures[index] || []).includes(picIndex);
-                                                return (
-                                                  <div 
-                                                    key={picIndex} 
-                                                    className={`${styles.relatedImageItem} ${isSelected ? styles.selected : ''}`}
-                                                    onClick={() => handlePictureToggle(index, picIndex)}
-                                                  >
-                                                    <div className={styles.imageContainer}>
-                                                      <img 
-                                                        src={picture.display_url} 
-                                                        alt={picture.title}
-                                                        className={styles.relatedImage}
-                                                        onError={(e) => {
-                                                          const target = e.target as HTMLImageElement;
-                                                          target.style.display = 'none';
-                                                        }}
-                                                      />
-                                                      <div className={styles.imageCheckbox}>
-                                                        <input 
-                                                          type="checkbox" 
-                                                          checked={isSelected}
-                                                          onChange={() => handlePictureToggle(index, picIndex)}
-                                                          onClick={(e) => e.stopPropagation()}
-                                                        />
+                  <div>
+                    {/* 文本信息 */}
+                    <div className={styles.textSection}>
+                      <h3>基本信息</h3>
+                      <div className={styles.textInfo}>
+                        {Object.entries(extractTextInfo(selectedReview.data)).map(([key, value]) => {
+                          // 跳过内部生成的字段
+                          if (key.endsWith('_count') || key.endsWith('_preview')) return null;
+                          
+                          // 友好的字段名映射
+                          const fieldLabels: Record<string, string> = {
+                            'city': '城市',
+                            'location': '位置',
+                            'name': '名称',
+                            'title': '标题',
+                            'description': '描述',
+                            'pictureAdvises': '图片建议',
+                            'type': '类型',
+                            'category': '分类',
+                            'address': '地址',
+                            'phone': '电话',
+                            'website': '网站',
+                            'rating': '评分',
+                            'price': '价格',
+                            'openTime': '开放时间',
+                            'tags': '标签',
+                            'culture': '文化',
+                            'history': '历史',
+                            'art': '艺术',
+                            'hero': '英雄人物',
+                            'activity': '活动',
+                            'tradition.food': '传统美食',
+                            'tradition.daily': '日常生活',
+                            'tradition.bigday': '重要节日',
+                            'tradition.tradition': '传统习俗'
+                          };
+                          
+                          const label = fieldLabels[key] || key;
+                          
+                          return (
+                            <div key={key} className={styles.textItem}>
+                              <label>{label}:</label>
+                              <span>
+                                {Array.isArray(value) ? (
+                                  key === 'pictureAdvises' ? (
+                                    <div>
+                                      <div>共 {value.length} 项建议</div>
+                                      <div className={styles.advisesList}>
+                                        {value.map((item: string, index: number) => {
+                                          // 获取对应的图片（每个建议对应3张图片）
+                                          const pictures = selectedReview?.data?.pictures || [];
+                                          const relatedPictures = pictures.slice(index * 3, (index + 1) * 3);
+                                          
+                                          return (
+                                            <div key={index} className={styles.adviseItemWithImages}>
+                                              <div className={styles.adviseText}>
+                                                {index + 1}. {item}
+                                              </div>
+                                              {relatedPictures.length > 0 && (
+                                                <div className={styles.relatedImages}>
+                                                  {relatedPictures.map((picture: any, picIndex: number) => {
+                                                    const isSelected = (selectedPictures[index] || []).includes(picIndex);
+                                                    return (
+                                                      <div 
+                                                        key={picIndex} 
+                                                        className={`${styles.relatedImageItem} ${isSelected ? styles.selected : ''}`}
+                                                        onClick={() => handlePictureToggle(index, picIndex)}
+                                                      >
+                                                        <div className={styles.imageContainer}>
+                                                          <img 
+                                                            src={picture.display_url} 
+                                                            alt={picture.title}
+                                                            className={styles.relatedImage}
+                                                            onError={(e) => {
+                                                              const target = e.target as HTMLImageElement;
+                                                              target.style.display = 'none';
+                                                            }}
+                                                          />
+                                                          <div className={styles.imageCheckbox}>
+                                                            <input 
+                                                              type="checkbox" 
+                                                              checked={isSelected}
+                                                              onChange={() => handlePictureToggle(index, picIndex)}
+                                                              onClick={(e) => e.stopPropagation()}
+                                                            />
+                                                          </div>
+                                                        </div>
+                                                        <div className={styles.imageTitle}>{picture.title}</div>
                                                       </div>
-                                                    </div>
-                                                    <div className={styles.imageTitle}>{picture.title}</div>
-                                                  </div>
-                                                );
-                                              })}
+                                                    );
+                                                  })}
+                                                </div>
+                                              )}
                                             </div>
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              ) : (
-                                value.join(', ')
-                              )
-                            ) : (
-                              String(value)
-                            )}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 图片展示 */}
-                <div className={styles.imageSection}>
-                  <div className={styles.imageSectionHeader}>
-                    <h3>图片内容</h3>
-                    <div className={styles.imageControls}>
-                      <div className={styles.imageFilters}>
-                        <button 
-                          className={imageFilter === 'all' ? styles.active : ''}
-                          onClick={() => setImageFilter('all')}
-                        >
-                          全部 ({selectedImages.length})
-                        </button>
-                        <button 
-                          className={imageFilter === 'selected' ? styles.active : ''}
-                          onClick={() => setImageFilter('selected')}
-                        >
-                          已选 ({selectedImages.filter(img => img.selected).length})
-                        </button>
-                        <button 
-                          className={imageFilter === 'unselected' ? styles.active : ''}
-                          onClick={() => setImageFilter('unselected')}
-                        >
-                          未选 ({selectedImages.filter(img => !img.selected).length})
-                        </button>
-                      </div>
-                      <div className={styles.batchActions}>
-                        <button onClick={handleSelectAll} className={styles.batchButton}>
-                          全选
-                        </button>
-                        <button onClick={handleDeselectAll} className={styles.batchButton}>
-                          全不选
-                        </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    value.join(', ')
+                                  )
+                                ) : (
+                                  String(value)
+                                )}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  </div>
 
-                  <div className={styles.imageGrid}>
-                    {getFilteredImages().map((image, index) => (
-                      <div 
-                        key={index} 
-                        className={`${styles.imageItem} ${image.selected ? styles.selectedImage : ''}`}
-                        onClick={() => handleImageToggle(image.url)}
-                      >
-                        <img 
-                          src={image.url} 
-                          alt={`图片 ${index + 1}`}
-                          className={styles.reviewImage}
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder-image.png';
-                          }}
-                        />
-                        <div className={styles.imageOverlay}>
-                          <div className={styles.imageGroup}>{image.group}</div>
-                          <div className={styles.selectIndicator}>
-                            {image.selected ? '✓' : '○'}
+                    {/* 图片展示 */}
+                    <div className={styles.imageSection}>
+                      <div className={styles.imageSectionHeader}>
+                        <h3>图片内容</h3>
+                        <div className={styles.imageControls}>
+                          <div className={styles.imageFilters}>
+                            <button 
+                              className={imageFilter === 'all' ? styles.active : ''}
+                              onClick={() => setImageFilter('all')}
+                            >
+                              全部 ({selectedImages.length})
+                            </button>
+                            <button 
+                              className={imageFilter === 'selected' ? styles.active : ''}
+                              onClick={() => setImageFilter('selected')}
+                            >
+                              已选 ({selectedImages.filter(img => img.selected).length})
+                            </button>
+                            <button 
+                              className={imageFilter === 'unselected' ? styles.active : ''}
+                              onClick={() => setImageFilter('unselected')}
+                            >
+                              未选 ({selectedImages.filter(img => !img.selected).length})
+                            </button>
+                          </div>
+                          <div className={styles.batchActions}>
+                            <button onClick={handleSelectAll} className={styles.batchButton}>
+                              全选
+                            </button>
+                            <button onClick={handleDeselectAll} className={styles.batchButton}>
+                              全不选
+                            </button>
                           </div>
                         </div>
                       </div>
-                    ))}
+
+                      <div className={styles.imageGrid}>
+                        {getFilteredImages().map((image, index) => (
+                          <div 
+                            key={index} 
+                            className={`${styles.imageItem} ${image.selected ? styles.selectedImage : ''}`}
+                            onClick={() => handleImageToggle(image.url)}
+                          >
+                            <img 
+                              src={image.url} 
+                              alt={`图片 ${index + 1}`}
+                              className={styles.reviewImage}
+                              onError={(e) => {
+                                e.currentTarget.src = '/placeholder-image.png';
+                              }}
+                            />
+                            <div className={styles.imageOverlay}>
+                              <div className={styles.imageGroup}>{image.group}</div>
+                              <div className={styles.selectIndicator}>
+                                {image.selected ? '✓' : '○'}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                </div>
                 )}
 
               </div>
