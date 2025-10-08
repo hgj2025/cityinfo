@@ -139,7 +139,7 @@ const OptimizedReviewQueue: React.FC = () => {
       
       if (tasksData.status !== 'success') return [];
       
-      const completedTasks = tasksData.data.tasks.filter((task: any) => 
+      const completedTasks = tasksData.data.filter((task: any) => 
         task.status === 'completed' && task.cozeResponse?.data
       );
 

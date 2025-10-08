@@ -12,9 +12,14 @@ export interface ReviewData {
   source: 'dataReview' | 'collectionTask';
 }
 
+export interface ImageItem {
+  url: string;
+  title?: string;
+}
+
 export interface ImageGroup {
   title: string;
-  images: string[];
+  images: (string | ImageItem)[];
 }
 
 export interface SelectedImage {

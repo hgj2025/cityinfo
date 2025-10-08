@@ -65,9 +65,9 @@ export const useReviewData = () => {
     try {
       const tasksData = await api.get(`/admin/data-collection/tasks?${params}`);
       
-      if (tasksData.status !== 'success' || !tasksData.data?.tasks) return [];
+      if (tasksData.status !== 'success' || !tasksData.data) return [];
       
-      const completedTasks = tasksData.data.tasks.filter((task: any) => 
+      const completedTasks = tasksData.data.filter((task: any) => 
         task.status === 'completed' && task.cozeResponse?.data
       );
 

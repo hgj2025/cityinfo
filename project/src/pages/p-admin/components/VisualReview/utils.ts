@@ -1,4 +1,4 @@
-import { ImageGroup } from './types';
+import { ImageGroup, ImageItem } from './types';
 
 export const isValidImageUrl = (url: string): boolean => {
   return url.includes('http') || url.includes('data:image') || 
@@ -17,23 +17,60 @@ export const extractImages = (data: any): ImageGroup[] => {
   
   imageFields.forEach(fieldName => {
     if (data[fieldName]) {
-      let images: string[] = [];
+      let images: (string | ImageItem)[] = [];
       
       if (Array.isArray(data[fieldName])) {
-        images = data[fieldName].filter((item: any) => {
-          if (typeof item === 'string') {
-            return isValidImageUrl(item);
-          }
-          return false;
-        });
-      } else if (typeof data[fieldName] === 'string' && isValidImageUrl(data[fieldName])) {
-        images = [data[fieldName]];
+        if (fieldName === 'pictureAdvises') {
+          // pictureAdvises 包含图片描述文本，转换为占位图片
+          images = data[fieldName]
+            .filter((item: any) => typeof item === 'string' && item.trim().length > 0)
+            .map((description: string, index: number) => ({
+              url: `https://via.placeholder.com/300x200/e0e0e0/666666?text=${encodeURIComponent('图片描述')}`,
+              title: description.length > 50 ? description.substring(0, 50) + '...' : description
+            }));
+        } else {
+          // 其他字段处理实际的图片URL
+          images = data[fieldName]
+            .map((item: any) => {
+              // 处理字符串类型的图片URL
+              if (typeof item === 'string') {
+                return isValidImageUrl(item) ? item : null;
+              }
+              // 处理对象类型的图片（如pictures字段中的{title, display_url}）
+              if (typeof item === 'object' && item !== null) {
+                if (item.display_url && isValidImageUrl(item.display_url)) {
+                  return {
+                    url: item.display_url,
+                    title: item.title || item.name || '未命名图片'
+                  };
+                }
+                if (item.url && isValidImageUrl(item.url)) {
+                  return {
+                    url: item.url,
+                    title: item.title || item.name || '未命名图片'
+                  };
+                }
+              }
+              return null;
+            })
+            .filter((item: any) => item !== null);
+        }
+      } else if (typeof data[fieldName] === 'string') {
+        if (fieldName === 'pictureAdvises') {
+          // 单个图片描述
+          images = [{
+            url: `https://via.placeholder.com/300x200/e0e0e0/666666?text=${encodeURIComponent('图片描述')}`,
+            title: data[fieldName].length > 50 ? data[fieldName].substring(0, 50) + '...' : data[fieldName]
+          }];
+        } else if (isValidImageUrl(data[fieldName])) {
+          images = [data[fieldName]];
+        }
       }
       
       if (images.length > 0) {
         const title = fieldName === 'images' ? '主要图片' : 
                      fieldName === 'pictures' ? '相关图片' : 
-                     fieldName === 'pictureAdvises' ? '推荐图片' :
+                     fieldName === 'pictureAdvises' ? '推荐图片描述' :
                      fieldName === 'image' ? '封面图片' : fieldName;
         groups.push({ title, images });
       }

@@ -52,10 +52,12 @@ const VisualReviewInterface: React.FC = () => {
               </div>
             </div>
             <div className={styles.detailContent}>
-              <div className={styles.basicInfo}>
+              <div className={styles.basicInfoSection}>
                 <ReviewDetail data={selectedReview} />
               </div>
-              <ImageDisplaySection data={selectedReview} />
+              <div className={styles.imageGallerySection}>
+                <ImageDisplaySection data={selectedReview} />
+              </div>
             </div>
           </>
         )}

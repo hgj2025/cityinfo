@@ -23,9 +23,8 @@ const ReviewList: React.FC<ReviewListProps> = ({
     <div className={styles.reviewList}>
       <h2>待审核列表</h2>
       {reviews.map((review) => {
-        const imageGroups = extractImages(review.data);
-        const totalImages = imageGroups.reduce((sum, group) => sum + group.images.length, 0);
         const textInfo = extractTextInfo(review.data);
+        const cityName = textInfo.city || textInfo.location || textInfo.place || '未知城市';
         
         return (
           <div 
@@ -33,51 +32,14 @@ const ReviewList: React.FC<ReviewListProps> = ({
             className={`${styles.reviewItem} ${selectedReview?.id === review.id ? styles.selected : ''}`}
             onClick={() => onSelectReview(review)}
           >
-            <div className={styles.reviewHeader}>
-              <span className={styles.dataType}>
-                {dataTypeLabels[review.dataType] || review.dataType}
-              </span>
-              <span className={styles.imageCount}>
-                📷 {totalImages}
-              </span>
-            </div>
-            
-            <div className={styles.reviewTitle}>
-              {textInfo.name || textInfo.title || textInfo.attraction_name || 
-               textInfo.city || textInfo.location || textInfo.place || 
-               (textInfo.pictureAdvises && Array.isArray(textInfo.pictureAdvises) ? 
-                 `${textInfo.city || '城市'} - ${textInfo.pictureAdvises.length}张图片建议` : 
-                 '数据审核项目')}
-            </div>
-            
-            <div className={styles.reviewMeta}>
-              <span>{formatDate(review.submittedAt)}</span>
-              <span className={styles.source}>
-                {review.source === 'dataReview' ? '数据审核' : '采集任务'}
-              </span>
-            </div>
-            
-            {/* 预览图片 */}
-            {imageGroups.length > 0 && (
-              <div className={styles.previewImages}>
-                {imageGroups[0].images.slice(0, 3).map((url, index) => (
-                  <img 
-                    key={index}
-                    src={url} 
-                    alt={`预览 ${index + 1}`}
-                    className={styles.previewImage}
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ))}
-                {totalImages > 3 && (
-                  <div className={styles.moreImages}>
-                    +{totalImages - 3}
-                  </div>
-                )}
+            <div className={styles.compactReviewContent}>
+              <div className={styles.cityName}>
+                {cityName}
               </div>
-            )}
+              <div className={styles.collectTime}>
+                {formatDate(review.submittedAt)}
+              </div>
+            </div>
           </div>
         );
       })}

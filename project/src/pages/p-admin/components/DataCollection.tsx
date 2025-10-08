@@ -37,7 +37,7 @@ const DataCollection: React.FC = () => {
     try {
       setLoading(true);
       const data = await api.get('/admin/data-collection/tasks');
-      const taskList = data.data?.tasks || [];
+      const taskList = data.data || [];
       setTasks(taskList);
         
       // 计算统计数据

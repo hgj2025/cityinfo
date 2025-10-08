@@ -45,7 +45,7 @@ const DataReview: React.FC = () => {
   const fetchTasks = async () => {
     try {
       const data = await api.get('/admin/data-collection/tasks');
-      setTasks(data.data?.tasks || []);
+      setTasks(data.data || []);
     } catch (error) {
       console.error('获取任务列表失败:', error);
     }

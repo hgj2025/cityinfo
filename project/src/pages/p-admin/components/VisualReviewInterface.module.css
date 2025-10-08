@@ -67,7 +67,7 @@
 
 /* 左侧审核列表 */
 .reviewList {
-  width: 400px;
+  width: 280px;
   background: white;
   display: flex;
   flex-direction: column;
@@ -152,6 +152,25 @@
   border-radius: 3px;
 }
 
+/* 紧凑列表样式 */
+.compactReviewContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cityName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  line-height: 1.4;
+}
+
+.collectTime {
+  font-size: 12px;
+  color: #718096;
+}
+
 .previewImages {
   display: flex;
   gap: 8px;
@@ -220,7 +239,28 @@
   overflow-y: auto;
   padding: 24px;
   display: flex;
+  flex-direction: row;
   gap: 24px;
+}
+
+/* 基本信息区域 */
+.basicInfoSection {
+  flex: 0 0 400px;
+  min-width: 400px;
+  overflow-y: auto;
+}
+
+/* 图集区域 */
+.imageGallerySection {
+  flex: 1;
+  min-width: 600px;
+  overflow-y: auto;
+}
+
+/* ReviewDetail包装器 */
+.reviewDetailWrapper {
+  width: 100%;
+  height: 100%;
 }
 
 /* 基本信息区域 */
@@ -229,10 +269,99 @@
   min-width: 400px;
 }
 
-/* 图片展示区域 */
-.imageSection {
+/* 图片展示区域容器 */
+.imageDisplayArea {
   flex: 1;
   min-width: 600px;
+  max-width: 800px;
+}
+
+/* 图片展示区域 */
+.imageSection {
+  width: 100%;
+  height: 100%;
+}
+
+/* 单列图片布局 */
+.singleImageColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.singleImageColumn h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* 三列图片网格 */
+.compactImageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 16px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* 可选择的图片项 */
+.selectableImageItem {
+  position: relative;
+  border-radius: 6px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.selectableImageItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #3182ce;
+}
+
+.selectableImageItem.selected {
+  border-color: #3182ce;
+  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+}
+
+/* 选择指示器 */
+.selectionIndicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.selectableImageItem.selected .selectionIndicator {
+  background: #3182ce;
+  border-color: #3182ce;
+  color: white;
+}
+
+.selectionIndicator::after {
+  content: '✓';
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.selectableImageItem.selected .selectionIndicator::after {
+  opacity: 1;
 }
 
 /* 图片两列布局 */
@@ -261,11 +390,11 @@
 
 .imageGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 16px;
   background: #f7fafc;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
@@ -273,12 +402,12 @@
 
 .imageItem {
   position: relative;
-  aspect-ratio: 1;
   border-radius: 6px;
-  overflow: hidden;
   background: white;
   border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .imageItem:hover {
@@ -288,9 +417,25 @@
 
 .thumbnailImage {
   width: 100%;
-  height: 100%;
+  height: 150px;
   object-fit: cover;
   cursor: pointer;
+  border-radius: 6px 6px 0 0;
+}
+
+.imageTitle {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #4a5568;
+  background: white;
+  border-radius: 0 0 6px 6px;
+  text-align: center;
+  line-height: 1.3;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-word;
 }
 
 .emptyImageGrid {
