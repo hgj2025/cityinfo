@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ReviewData, ImageItem } from '../types';
 import { extractImages } from '../utils';
 import styles from '../../VisualReviewInterface.module.css';
@@ -9,7 +9,6 @@ interface ImageDisplaySectionProps {
 
 const ImageDisplaySection: React.FC<ImageDisplaySectionProps> = ({ data }) => {
   const imageGroups = extractImages(data.data);
-  const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   
   // 从图片组中提取所有图片
   const getAllImages = () => {
@@ -66,19 +65,6 @@ const ImageDisplaySection: React.FC<ImageDisplaySectionProps> = ({ data }) => {
 
   const allImages = getAllImages();
 
-  // 处理图片选择
-  const handleImageSelect = (imageUrl: string) => {
-    setSelectedImages(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(imageUrl)) {
-        newSet.delete(imageUrl);
-      } else {
-        newSet.add(imageUrl);
-      }
-      return newSet;
-    });
-  };
-
   const renderImageGrid = (images: ImageItem[], title: string) => {
     if (images.length === 0) {
       return (
@@ -90,30 +76,25 @@ const ImageDisplaySection: React.FC<ImageDisplaySectionProps> = ({ data }) => {
 
     return (
       <div className={styles.compactImageGrid}>
-        {images.map((image, index) => {
-          const isSelected = selectedImages.has(image.url);
-          return (
-            <div 
-              key={index} 
-              className={`${styles.selectableImageItem} ${isSelected ? styles.selected : ''}`}
-              onClick={() => handleImageSelect(image.url)}
-            >
-              <div className={styles.selectionIndicator}></div>
-              <img
-                src={image.url}
-                alt={image.title || `${title} ${index + 1}`}
-                className={styles.thumbnailImage}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
-              />
-              <div className={styles.imageTitle}>
-                {image.title || '未命名图片'}
-              </div>
+        {images.map((image, index) => (
+          <div 
+            key={index} 
+            className={styles.imageItem}
+          >
+            <img
+              src={image.url}
+              alt={image.title || `${title} ${index + 1}`}
+              className={styles.thumbnailImage}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+            />
+            <div className={styles.imageTitle}>
+              {image.title || '未命名图片'}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     );
   };
@@ -121,9 +102,7 @@ const ImageDisplaySection: React.FC<ImageDisplaySectionProps> = ({ data }) => {
   return (
     <div className={styles.imageSection}>
       <div className={styles.singleImageColumn}>
-        <h3>所有可选图集 ({allImages.length}) {selectedImages.size > 0 && (
-          <span> - 已选择 {selectedImages.size} 张</span>
-        )}</h3>
+        <h3>所有可选图集 ({allImages.length})</h3>
         {renderImageGrid(allImages, '可选图片')}
       </div>
     </div>

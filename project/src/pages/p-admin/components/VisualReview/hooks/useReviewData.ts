@@ -28,7 +28,7 @@ export const useReviewData = () => {
       // 获取数据审核数据源
       const [dataReviewRes, collectionTaskRes] = await Promise.all([
         api.get(`/admin/reviews?${params}`),
-        fetchCollectionTaskReviews(params)
+        fetchCollectionTaskReviews(currentPage)
       ]);
 
       // 整合所有数据
@@ -61,8 +61,14 @@ export const useReviewData = () => {
     }
   };
 
-  const fetchCollectionTaskReviews = async (params: URLSearchParams) => {
+  const fetchCollectionTaskReviews = async (page: number = 1) => {
     try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pageSize.toString(),
+        status: 'pending'
+      });
+      
       const tasksData = await api.get(`/admin/data-collection/tasks?${params}`);
       
       if (tasksData.status !== 'success' || !tasksData.data) return [];
@@ -114,6 +120,8 @@ export const useReviewData = () => {
     totalPages,
     setCurrentPage,
     handleSelectReview,
+    fetchReviews,
+    fetchCollectionTaskReviews,
     refreshReviews: fetchReviews
   };
 };

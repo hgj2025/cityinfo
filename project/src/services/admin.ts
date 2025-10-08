@@ -16,7 +16,7 @@ class AdminService {
    */
   async getDashboardStats(): Promise<any> {
     const response = await api.get('/admin/dashboard/stats');
-    return response.data;
+    return response;
   }
 
   /**
@@ -24,7 +24,7 @@ class AdminService {
    */
   async startDataCollection(request: any): Promise<any> {
     const response = await api.post('/admin/data-collection/start', request);
-    return response.data;
+    return response;
   }
 
   /**
@@ -32,7 +32,7 @@ class AdminService {
    */
   async getCollectionTasks(): Promise<any> {
     const response = await api.get('/admin/data-collection/tasks');
-    return response.data;
+    return response;
   }
 
   /**
@@ -40,7 +40,7 @@ class AdminService {
    */
   async getTaskStatus(taskId: string): Promise<any> {
     const response = await api.get(`/admin/data-collection/tasks/${taskId}`);
-    return response.data;
+    return response;
   }
 
   /**
@@ -48,7 +48,7 @@ class AdminService {
    */
   async getTaskDetails(taskId: string): Promise<any> {
     const response = await api.get(`/admin/data-collection/tasks/${taskId}/details`);
-    return response.data;
+    return response;
   }
 
   /**
@@ -56,7 +56,7 @@ class AdminService {
    */
   async getPendingReviews(): Promise<any> {
     const response = await api.get('/admin/reviews');
-    return response.data;
+    return response;
   }
 
   /**
@@ -64,7 +64,7 @@ class AdminService {
    */
   async reviewData(reviewId: string, request: any): Promise<any> {
     const response = await api.post(`/admin/reviews/${reviewId}`, request);
-    return response.data;
+    return response;
   }
 
   /**
@@ -72,7 +72,22 @@ class AdminService {
    */
   async getCollectionTaskReviews(taskId: string, page: number = 1, limit: number = 10): Promise<any> {
     const response = await api.get(`/admin/collection-tasks/${taskId}/reviews?page=${page}&limit=${limit}`);
-    return response.data;
+    return response;
+  }
+
+  // Coze审核相关方法（占位符）
+  async getCozeReviews(page: number = 1, limit: number = 10) {
+    // TODO: 实现coze审核数据获取
+    return {
+      reviews: [],
+      totalPages: 0,
+      total: 0
+    };
+  }
+
+  async reviewCozeData(reviewId: string, request: any) {
+    // TODO: 实现coze数据审核
+    return { status: 'success', message: '功能暂未实现' };
   }
 }
 

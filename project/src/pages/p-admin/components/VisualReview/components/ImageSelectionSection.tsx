@@ -3,68 +3,44 @@ import { ImageSelectionSectionProps } from '../types';
 import styles from '../../VisualReviewInterface.module.css';
 
 const ImageSelectionSection: React.FC<ImageSelectionSectionProps> = ({
-  selectedImages,
-  imageFilter,
-  onImageToggle,
-  onSelectAll,
-  onDeselectAll,
-  onFilterChange
+  selectedImages
 }) => {
-  const getFilteredImages = () => {
-    switch (imageFilter) {
-      case 'selected':
-        return selectedImages.filter(img => img.selected);
-      case 'unselected':
-        return selectedImages.filter(img => !img.selected);
-      default:
-        return selectedImages;
-    }
-  };
-
-  const filteredImages = getFilteredImages();
-
   return (
     <div className={styles.imageSection}>
       <div className={styles.imageSectionHeader}>
         <h3>图片内容</h3>
         <div className={styles.imageControls}>
-          <div className={styles.imageFilters}>
-            <button 
-              className={imageFilter === 'all' ? styles.active : ''}
-              onClick={() => onFilterChange('all')}
-            >
-              全部 ({selectedImages.length})
-            </button>
-            <button 
-              className={imageFilter === 'selected' ? styles.active : ''}
-              onClick={() => onFilterChange('selected')}
-            >
-              已选 ({selectedImages.filter(img => img.selected).length})
-            </button>
-            <button 
-              className={imageFilter === 'unselected' ? styles.active : ''}
-              onClick={() => onFilterChange('unselected')}
-            >
-              未选 ({selectedImages.filter(img => !img.selected).length})
-            </button>
-          </div>
-          <div className={styles.batchActions}>
-            <button onClick={onSelectAll} className={styles.batchButton}>
-              全选
-            </button>
-            <button onClick={onDeselectAll} className={styles.batchButton}>
-              全不选
-            </button>
-          </div>
+          <span className={styles.imageCount}>共 {selectedImages.length} 张图片</span>
         </div>
       </div>
 
       <div className={styles.imageGrid}>
-        {filteredImages.map((image, index) => (
+        {selectedImages.map((image, index) => (
           <div 
             key={index} 
-            className={`${styles.imageItem} ${image.selected ? styles.selectedImage : ''}`}
-            onClick={() => onImageToggle(image.url)}
+            className={styles.imageItem}
+            draggable={true}
+            onDragStart={(e) => {
+              console.log('=== 开始拖拽图片 ===');
+              console.log('图片URL:', image.url);
+              console.log('图片组:', image.group);
+              
+              try {
+                // 直接传输图片URL，利用浏览器的默认行为
+                e.dataTransfer.setData('text/plain', image.url);
+                e.dataTransfer.setData('text/uri-list', image.url);
+                e.dataTransfer.effectAllowed = 'copy';
+                
+                console.log('拖拽URL设置成功:', image.url);
+                console.log('设置的数据类型:', e.dataTransfer.types);
+              } catch (error) {
+                console.error('设置拖拽数据时发生错误:', error);
+              }
+            }}
+            onDragEnd={(e) => {
+              console.log('拖拽结束');
+            }}
+            title="拖拽到基本信息区域进行配图"
           >
             <img 
               src={image.url} 
@@ -77,8 +53,8 @@ const ImageSelectionSection: React.FC<ImageSelectionSectionProps> = ({
             />
             <div className={styles.imageOverlay}>
               <div className={styles.imageGroup}>{image.group}</div>
-              <div className={styles.selectIndicator}>
-                {image.selected ? '✓' : '○'}
+              <div className={styles.dragIndicator}>
+                ⋮⋮
               </div>
             </div>
           </div>
